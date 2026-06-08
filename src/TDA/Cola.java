@@ -17,9 +17,10 @@ public class Cola <T> {
 
 
     public Cola() {
-        fin = null;
-        tamanio = null;
-        tamanio =0;
+        this.frente=null;
+        this.fin = null;
+        this.tamanio =0;
     }
+
 
 }

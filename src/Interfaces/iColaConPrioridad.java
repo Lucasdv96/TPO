@@ -1,6 +1,6 @@
 package Interfaces;
 
-public interface iColaConPriodad<T> {
+public interface iColaConPrioridad <T>{
     void encolar(T elemento, int prioridad);
 
     T desencolar();
@@ -13,3 +13,4 @@ public interface iColaConPriodad<T> {
 
     int cantidad();
 }
+

@@ -4,54 +4,24 @@ import Interfaces.iCola;
 import Interfaces.iColaConPrioridad;
 
 public class ColaConPrioridad <T> implements iColaConPrioridad {
+
     @Override
-    public void encolar(Object elemento, int prioridad) {
+    public void insert(Object dato, int prioridad) {
 
     }
 
     @Override
-    public Object desencolar() {
+    public Object extractMax() {
         return null;
     }
 
     @Override
-    public Object frente() {
+    public Object peek() {
         return null;
     }
 
     @Override
-    public boolean estaVacia() {
+    public boolean isEmpty() {
         return false;
-    }
-
-    @Override
-    public boolean estaLlena() {
-        return false;
-    }
-
-    @Override
-    public int cantidad() {
-        return 0;
-    }
-
-    private static class Nodo <T> {
-        T dato;
-        Nodo <T> siguiente;
-
-        public Nodo(T dato) {
-            this.dato = dato;
-            this.siguiente = null;
-        }
-    }
-
-    private Nodo <T> frente;
-    private Nodo <T> fin;
-    private int tamanio;
-
-
-    public ColaConPrioridad() {
-        this.frente=null;
-        this.fin = null;
-        this.tamanio =0;
     }
 }

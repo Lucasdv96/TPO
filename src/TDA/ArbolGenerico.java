@@ -1,4 +1,7 @@
 package TDA;
 
-public class ArbolGenerico {
+import Interfaces.iAbb;
+import Interfaces.iArbolGenerico;
+
+public class ArbolGenerico implements iArbolGenerico {
 }

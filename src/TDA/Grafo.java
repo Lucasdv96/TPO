@@ -1,4 +1,7 @@
 package TDA;
 
-public class Grafo {
+import Interfaces.iGrafo;
+
+public class Grafo implements iGrafo {
+
 }

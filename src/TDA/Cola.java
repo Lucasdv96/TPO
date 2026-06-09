@@ -1,26 +1,9 @@
 package TDA;
 
-public class Cola <T> {
-    private static class Nodo <T> {
-        T dato;
-        Nodo <T> siguiente;
+import Interfaces.iCola;
 
-        public Nodo(T dato) {
-            this.dato = dato;
-            this.siguiente = null;
-        }
-    }
+public class Cola implements iCola {
 
-    private Nodo <T> frente;
-    private Nodo <T> fin;
-    private int tamanio;
-
-
-    public Cola() {
-        this.frente=null;
-        this.fin = null;
-        this.tamanio =0;
-    }
 
 
 }

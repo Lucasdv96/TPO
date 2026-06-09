@@ -1,4 +1,7 @@
 package TDA;
 
-public class Cd {
+
+import Interfaces.iCd;
+
+public class Cd implements iCd {
 }

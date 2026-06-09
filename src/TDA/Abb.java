@@ -1,4 +1,6 @@
 package TDA;
 
-public class Abb {
+import Interfaces.iAbb;
+
+public class Abb implements iAbb {
 }

@@ -1,4 +1,6 @@
 package TDA;
 
-public class ArbolB {
+import Interfaces.iArbolB;
+
+public class ArbolB implements iArbolB {
 }

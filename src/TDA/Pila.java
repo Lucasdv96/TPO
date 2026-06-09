@@ -1,4 +1,8 @@
 package TDA;
 
-public class Pila {
+import Interfaces.iGrafo;
+import Interfaces.iPila;
+
+public class Pila implements iPila {
+
 }

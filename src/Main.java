@@ -7,9 +7,9 @@ import TDA.Cd;
 // import TDA.ArbolB;
 // import TDA.ArbolGenerico;
 // import TDA.Grafo;
-// import TDA.Cola;
-// import TDA.ColaConPrioridad;
-// import TDA.Pila;
+import TDA.Cola;
+import TDA.ColaConPrioridad;
+import TDA.Pila;
 
 import java.util.Scanner;
 
@@ -23,7 +23,6 @@ import java.util.Scanner;
  * Pt El profe
  */
 ///
-public class Main {
     // TDA de P1
     static Cd<String, Stream> streamDictionary = new Cd<>();
 
@@ -36,9 +35,9 @@ public class Main {
     // static ArbolGenerico<Categoria> arbolGeneros  = new ArbolGenerico<>();
 
     // TDAs de P4 (Descomentar cuando este lo del Autista de toto 🎻)
-    // static Pila<String>             pilaNavegacion    = new Pila<>();
-    // static Cola<Cancion>            colaReproduccion  = new Cola<>();
-    // static ColaConPrioridad<Canal>  colaTranscoding   = new ColaConPrioridad<>();
+    static Pila<String> pilaNavegacion = new Pila<>();
+    static Cola<Cancion> colaReproduccion = new Cola<>();
+    static ColaConPrioridad<Stream> colaTranscoding = new ColaConPrioridad<>();
 
     // TDA de P5 (Nada lo mismo que lo de arriba ya me da paja escribir)
     // static Grafo<Servidor> redCDN = new Grafo<>();
@@ -58,9 +57,9 @@ public class Main {
         // Usuarios
         Usuario u1 = new Usuario(101, "Gabriel",  "gaby@mail.com",   Usuario.TipoCuenta.PREMIUM);
         Usuario u2 = new Usuario(102, "Lucas",    "lucas@mail.com",  Usuario.TipoCuenta.GRATUITO);
-        Usuario u3 = new Usuario(102, "Toto",    "tobias@mail.com",  Usuario.TipoCuenta.GRATUITO);
-        Usuario u4 = new Usuario(103, "Nestor",   "nestor@mail.com",   Usuario.TipoCuenta.PREMIUM);
-        Usuario u5 = new Usuario(103, "brisa",   "brichota@mail.com",   Usuario.TipoCuenta.PREMIUM);
+        Usuario u3 = new Usuario(103, "Toto",    "tobias@mail.com",  Usuario.TipoCuenta.GRATUITO);
+        Usuario u4 = new Usuario(104, "Nestor",   "nestor@mail.com",   Usuario.TipoCuenta.PREMIUM);
+        Usuario u5 = new Usuario(105, "brisa",   "brichota@mail.com",   Usuario.TipoCuenta.PREMIUM);
 
         // Canales
         CreadorCont canal1 = new CreadorCont(1, "rockclasico",  "Rock de los 70s-90s");
@@ -81,7 +80,7 @@ public class Main {
         // arbolGeneros.agregarHijo(raiz, subgenero); ...
 
         // TODO P4: apilar pantalla inicial en Pila
-        // pilaNavegacion.push("INICIO");
+        pilaNavegacion.push("INICIO");
 
         // TODO P5: construir red CDN en Grafo
         // Servidor sBA = new Servidor("BA","Buenos Aires"); ...
@@ -91,7 +90,7 @@ public class Main {
     }
 
     // menu principal para el "usuario"
-    public static void main(String[] args) {
+    void main(String[] args) {
         cargarDatosPrueba();
         int opcion;
         do {
@@ -246,18 +245,43 @@ public class Main {
     static void menuPila() {
         System.out.println("\n── Historial de Navegación (Pila) ── [P4]");
         // TODO P4: push/pop/peek
+
+        while(!pilaNavegacion.isEmpty()){
+            System.out.println("\n Quien esta arriba? " + pilaNavegacion.peek());
+            System.out.println("Se nos fue: " + pilaNavegacion.pop());
+
+        }
+        System.out.println("\n Ya no hay mas");
+
+
         System.out.println("  ⏳ Pendiente — P4 entrega esta semana.");
     }
 
     static void menuCola() {
         System.out.println("\n── Cola de Reproducción (Cola) ── [P4]");
         // TODO P4: enqueue/dequeue/front
+        Cancion c1 = new Cancion(1, "Bohemian Rhapsody", "Queen",       "Rock",        354);
+        Cancion c2 = new Cancion(2, "Blinding Lights",   "The Weeknd",  "Pop",         200);
+        Cancion c3 = new Cancion(3, "Strobe",            "deadmau5",    "Electrónica", 601);
+        colaReproduccion.isEmpty();
+        colaReproduccion.enqueue(c1);
+        colaReproduccion.enqueue(c2);
+        colaReproduccion.enqueue(c3);
+
+        while(!colaReproduccion.isEmpty()){
+            System.out.println("\n Siguente Cancion: " + colaReproduccion.front().getTitulo());
+            String cancion = colaReproduccion.dequeue().getTitulo();
+            System.out.println("\n Escuchando... " + cancion);
+            pilaNavegacion.push(cancion);
+        }
+
         System.out.println("  ⏳ Pendiente — P4 entrega esta semana.");
     }
 
     static void menuColaConPrioridad() {
         System.out.println("\n── Transcodificación (Cola con Prioridad) ── [P4]");
         // TODO P4: insert/extractMax/peek
+
         System.out.println("  ⏳ Pendiente — P4 entrega esta semana.");
     }
 
@@ -272,6 +296,7 @@ public class Main {
 
         // Paso 1: extraer canal con mayor prioridad de la Cola
         // TODO P4: Canal canal = colaTranscoding.extractMax();
+        Stream canal = colaTranscoding.extractMax();
         System.out.println("  [ColaConPrioridad] Extrayendo canal de mayor prioridad... ⏳ P4 pendiente");
 
         // Paso 2: buscar ese canal en el ABB por username
@@ -336,4 +361,3 @@ public class Main {
         }
         return scanner.nextInt();
     }
-}

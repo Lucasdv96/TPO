@@ -10,10 +10,13 @@ package Interfaces;
 // haceme la cola profe 😁😁😁
 public interface iCola<T> {
 
+    // Encola el dato que quieras agregar
     void enqueue(T dato);
 
+    // Desencola el primer dato agregado y lo retorna
     T dequeue();
 
+    // Devuelve el dato que esta al frente de la Cola
     T front();
 
     boolean isEmpty();

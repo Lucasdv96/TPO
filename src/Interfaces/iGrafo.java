@@ -22,7 +22,7 @@ public interface iGrafo<T> {
      * Agrega una arista entre dos vértices con un peso (latencia en ms).
      * O(1) con lista de adyacencia
      */
-    void agregarArista(T origen, T destino, int peso);
+    void agregarArista(T v1, T v2, int peso);
 
     /**
      * Recorrido BFS desde un vértice origen.

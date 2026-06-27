@@ -5,7 +5,7 @@ import TDA.Cd;
 // import TDA.Abb;
 // import TDA.Avl;
 // import TDA.ArbolB;
-// import TDA.ArbolGenerico;
+import TDA.ArbolGenerico;
 // import TDA.Grafo;
 import TDA.Cola;
 import TDA.ColaConPrioridad;
@@ -24,6 +24,7 @@ import java.util.Scanner;
  */
 ///
     // TDA de P1
+
     static Cd<String, Stream> streamDictionary = new Cd<>();
 
     // TDAs de P2 (descomentar P2 entregues 😏)
@@ -32,7 +33,7 @@ import java.util.Scanner;
 
     // TDAs de P3 (descomentar P3 cuando lo subas)
     // static ArbolB<Cancion>      catalogoHistorico = new ArbolB<>(2);
-    // static ArbolGenerico<Categoria> arbolGeneros  = new ArbolGenerico<>();
+    static ArbolGenerico<String> arbolGeneros  = new ArbolGenerico<>();
 
     // TDAs de P4 (Descomentar cuando este lo del Autista de toto 🎻)
     static Pila<String> pilaNavegacion = new Pila<>();
@@ -124,7 +125,7 @@ import java.util.Scanner;
                 case 1  -> menuArbolB();
                 case 2  -> menuAVL();
                 case 3  -> menuABB();
-                case 4  -> menuArbolNario();
+                case 4  -> menuArbolB();
                 case 5  -> menuGrafo();
                 case 6  -> menuPila();
                 case 7  -> menuCola();
@@ -213,9 +214,23 @@ import java.util.Scanner;
     }
 
     static void menuArbolB() {
-        System.out.println("\n── Catálogo Histórico (Árbol B) ── [P3]");
+        //System.out.println("\n── Catálogo Histórico (Árbol B) ── [P3]");
         // TODO P3: implementar submenú con insertar/buscar/mostrar
-        System.out.println("  ⏳ Pendiente — P3 entrega esta semana.");
+        //System.out.println("  ⏳ Pendiente — P3 entrega esta semana.");
+
+        arbolGeneros.agregarHijo("Música", "Rock");
+        arbolGeneros.agregarHijo("Música", "Pop");
+
+        // Agregamos subgéneros buscando a sus padres
+        arbolGeneros.agregarHijo("Rock", "Punk");
+        arbolGeneros.agregarHijo("Rock", "Metal");
+        arbolGeneros.agregarHijo("Pop", "Synth");
+
+        System.out.println("--- RECORRIDO EN PROFUNDIDAD (Hasta el fondo) ---");
+        arbolGeneros.recorridoProfundidad();
+
+        System.out.println("--- RECORRIDO EN AMPLITUD (Nivel por Nivel) ---");
+        arbolGeneros.recorridoAmplitud();
     }
 
     static void menuAVL() {

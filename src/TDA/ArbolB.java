@@ -167,5 +167,4 @@ public class ArbolB <T extends Comparable<T>> implements iArbolB <T>{
     public boolean esVacio() {
         return raiz == null || (raiz.claves.isEmpty() && raiz.esHoja);
     }
-
 }

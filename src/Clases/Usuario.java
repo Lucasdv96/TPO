@@ -9,7 +9,7 @@ import java.util.List;
  * Tiene su propia Pila de navegación y Cola de reproducción instanciadas en Main.
  */
 
-public class Usuario implements Comparable<Usuario> {
+public class  Usuario implements Comparable<Usuario> {
 
     // le pase el codigo a claudio para ver si estaba bien y me agrego esto, si les gusta lo sacamos y si no vuela
     public enum TipoCuenta { GRATUITO, PREMIUM }

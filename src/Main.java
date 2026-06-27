@@ -1,5 +1,5 @@
 import Clases.*;
-import TDA.Cd;
+import TDA.Diccionario;
 
 // Cuando los terminan descomentan el TDA que hicieron
 // import TDA.Abb;
@@ -25,7 +25,7 @@ import java.util.Scanner;
 ///
     // TDA de P1
 
-    static Cd<String, Stream> streamDictionary = new Cd<>();
+    static Diccionario<String, Stream> streamDictionary = new Diccionario<>();
 
     // TDAs de P2 (descomentar P2 entregues 😏)
     // static Abb<Canal>   catalogoCanales = new Abb<>();

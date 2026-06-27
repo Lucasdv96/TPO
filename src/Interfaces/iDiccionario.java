@@ -7,7 +7,7 @@ package Interfaces;
  * Este es la mia despues lo hago, lo dejo asi para ya pushear
  * Le pedi a claude que lo comente todo, despues cuando vaya a usarlo le edito las cosas 😈
  */
-public interface iCd<K, V> {
+public interface iDiccionario<K, V> {
 
     /**
      * Asocia una clave con un valor. O(1) amortizado

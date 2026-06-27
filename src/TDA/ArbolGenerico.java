@@ -46,6 +46,10 @@ public class ArbolGenerico <T> implements iArbolGenerico <T>{
             this.raiz.hijos.add(new NodoNario<>(datoHijo));
         }
 
+        // prevenir duplicados
+        if (buscarNodo(raiz, datoHijo) != null){ //se fija en toda la raiz si el dato hijo ya existe, si no da nula no hagas mas nada.
+            return;
+        }
         // buscamos el nodo del padre en todo el arbol empezando desde la raiz.
         NodoNario<T> nodoPadreEncontrado = buscarNodo(this.raiz, datoPadre);
 
@@ -59,7 +63,7 @@ public class ArbolGenerico <T> implements iArbolGenerico <T>{
 
     private NodoNario<T> buscarNodo(NodoNario<T> nodoBuscar, T datoBuscar){
         if (nodoBuscar == null) return null;
-        if (nodoBuscar.dato.equals(datoBuscar)) return nodoBuscar;
+        if (nodoBuscar.dato != null && nodoBuscar.dato.equals(datoBuscar)) return nodoBuscar;
 
         for (NodoNario<T> hijo : nodoBuscar.hijos){
             NodoNario<T> nodoEncontrado = buscarNodo(hijo, datoBuscar);
@@ -118,6 +122,6 @@ public class ArbolGenerico <T> implements iArbolGenerico <T>{
 
     @Override
     public boolean esVacio() {
-        return this.raiz == null;
+        return this.raiz == null || this.raiz.dato == null;
     }
 }

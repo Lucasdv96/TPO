@@ -26,6 +26,8 @@ public class Cancion implements Comparable<Cancion> {
         this.reproducciones++;
     }
 
+
+
     // Comparable por id — usado en ArbolB y ABB (P2 y P3 arreglense jijiji)
     @Override
     public int compareTo(Cancion otra) {

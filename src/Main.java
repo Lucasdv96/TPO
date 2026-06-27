@@ -4,7 +4,7 @@ import TDA.Cd;
 // Cuando los terminan descomentan el TDA que hicieron
 // import TDA.Abb;
 // import TDA.Avl;
-// import TDA.ArbolB;
+import TDA.ArbolB;
 import TDA.ArbolGenerico;
 // import TDA.Grafo;
 import TDA.Cola;
@@ -32,7 +32,7 @@ import java.util.Scanner;
     // static Avl<Usuario> usuariosActivos = new Avl<>();
 
     // TDAs de P3 (descomentar P3 cuando lo subas)
-    // static ArbolB<Cancion>      catalogoHistorico = new ArbolB<>(2);
+    static ArbolB<Cancion> catalogoHistorico = new ArbolB<>();
     static ArbolGenerico<String> arbolGeneros  = new ArbolGenerico<>();
 
     // TDAs de P4 (Descomentar cuando este lo del Autista de toto 🎻)
@@ -125,7 +125,7 @@ import java.util.Scanner;
                 case 1  -> menuArbolB();
                 case 2  -> menuAVL();
                 case 3  -> menuABB();
-                case 4  -> menuArbolB();
+                case 4  -> menuArbolNario();
                 case 5  -> menuGrafo();
                 case 6  -> menuPila();
                 case 7  -> menuCola();
@@ -214,23 +214,35 @@ import java.util.Scanner;
     }
 
     static void menuArbolB() {
-        //System.out.println("\n── Catálogo Histórico (Árbol B) ── [P3]");
-        // TODO P3: implementar submenú con insertar/buscar/mostrar
-        //System.out.println("  ⏳ Pendiente — P3 entrega esta semana.");
+        System.out.println("\n── Catálogo Histórico (Árbol B) ──");
+        System.out.println("  1. Cargar canciones de prueba");
+        System.out.println("  2. Buscar canción por ID");
+        System.out.println("  3. Mostrar catálogo completo (Ordenado)");
+        System.out.print("  Opción: ");
 
-        arbolGeneros.agregarHijo("Música", "Rock");
-        arbolGeneros.agregarHijo("Música", "Pop");
-
-        // Agregamos subgéneros buscando a sus padres
-        arbolGeneros.agregarHijo("Rock", "Punk");
-        arbolGeneros.agregarHijo("Rock", "Metal");
-        arbolGeneros.agregarHijo("Pop", "Synth");
-
-        System.out.println("--- RECORRIDO EN PROFUNDIDAD (Hasta el fondo) ---");
-        arbolGeneros.recorridoProfundidad();
-
-        System.out.println("--- RECORRIDO EN AMPLITUD (Nivel por Nivel) ---");
-        arbolGeneros.recorridoAmplitud();
+        switch (leerInt()) {
+            case 1 -> {
+                catalogoHistorico.insertar(new Cancion(20, "Bohemian Rhapsody", "Queen", "Rock", 354));
+                catalogoHistorico.insertar(new Cancion(40, "Blinding Lights", "The Weeknd", "Pop", 200));
+                catalogoHistorico.insertar(new Cancion(30, "Strobe", "deadmau5", "Electrónica", 601));
+                catalogoHistorico.insertar(new Cancion(25, "La Llorona", "Chavela Vargas", "Folk", 218));
+                System.out.println(" Canciones insertadas con éxito!");
+            }
+            case 2 -> {
+                System.out.print("  Ingresá el ID de la canción a buscar: ");
+                int idBusqueda = leerInt();
+                boolean encontrada = catalogoHistorico.buscar(new Cancion(idBusqueda, "", "", "", 0));
+                if (encontrada) {
+                    System.out.println("Cancion "+ idBusqueda + " encontrada en el Árbol B!");
+                } else {
+                    System.out.println(" Canción no encontrada.");
+                }
+            }
+            case 3 -> {
+                System.out.println("\n--- CONTENIDO DEL ÁRBOL B (Inorden) ---");
+                catalogoHistorico.mostrar();
+            }
+        }
     }
 
     static void menuAVL() {
@@ -246,9 +258,33 @@ import java.util.Scanner;
     }
 
     static void menuArbolNario() {
-        System.out.println("\n── Géneros Musicales (Árbol n-ario) ── [P3]");
-        // TODO P3: agregarHijo/recorridoProfundidad/recorridoAmplitud
-        System.out.println("  ⏳ Pendiente — P3 entrega esta semana.");
+        System.out.println("\n── Géneros Musicales (Árbol n-ario) ── ");
+        System.out.println("  1. Inicializar y cargar árbol de géneros");
+        System.out.println("  2. Mostrar recorrido en Amplitud (BFS)");
+        System.out.println("  3. Mostrar recorrido en Profundidad (DFS)");
+        System.out.print("  Opción: ");
+
+        switch (leerInt()) {
+            case 1 -> {
+                arbolGeneros = new ArbolGenerico<>();
+                arbolGeneros.agregarHijo(null, "Música");
+
+                arbolGeneros.agregarHijo("Música", "Rock");
+                arbolGeneros.agregarHijo("Música", "Pop");
+                arbolGeneros.agregarHijo("Música", "Trap");
+                arbolGeneros.agregarHijo("Rock", "Nac");
+                arbolGeneros.agregarHijo("Rock", "Int");
+                System.out.println(" Jerarquía de géneros cargada con éxito.");
+            }
+            case 2 -> {
+                System.out.println("\n--- RECORRIDO EN AMPLITUD ---");
+                arbolGeneros.recorridoAmplitud();
+            }
+            case 3 -> {
+                System.out.println("\n--- RECORRIDO EN PROFUNDIDAD ---");
+                arbolGeneros.recorridoProfundidad();
+            }
+        }
     }
 
     static void menuGrafo() {

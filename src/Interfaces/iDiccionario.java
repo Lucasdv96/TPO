@@ -1,11 +1,11 @@
 package Interfaces;
 
 /**
- * Uso en el sistema: StreamDictionary — mapa de streamId -> estado del stream.
- * Permite acceso O(1) promedio a cualquier stream activo por su ID.
- * Justificación: HashMap interno, O(1) amortizado para put/get/remove.
- * Este es la mia despues lo hago, lo dejo asi para ya pushear
- * Le pedi a claude que lo comente todo, despues cuando vaya a usarlo le edito las cosas 😈
+El diccionario se usa para ver si el usuario tiene un plan gratuito o  premiun
+ y asi determinar su prioridad
+ la complejidad es de.... no me acuerdo
+ 1 premium 0 gratuito
+ premium tiene mas prioridad.
  */
 public interface iDiccionario<K, V> {
 

@@ -11,6 +11,9 @@ import java.util.List;
 
 public class Usuario implements Comparable<Usuario> {
 
+    public Integer getPrioridad() {
+    }
+
     // le pase el codigo a claudio para ver si estaba bien y me agrego esto, si les gusta lo sacamos y si no vuela
     public enum TipoCuenta { GRATUITO, PREMIUM }
 
@@ -21,7 +24,7 @@ public class Usuario implements Comparable<Usuario> {
     private List<Playlist> playlists;
     private boolean activo;      // true = sesión iniciada (usado en AVL de activos)
 
-    public Usuario(int id, String nombre, String email, TipoCuenta tipoCuenta) {
+    public Usuario(String nombre, String email, TipoCuenta tipoCuenta) {
         this.id = id;
         this.nombre = nombre;
         this.email = email;

@@ -3,7 +3,6 @@ import TDA.Diccionario;
 import TDA.ArbolB;
 import TDA.ArbolGenerico;
 import TDA.Cola;
-import TDA.ColaConPrioridad;
 import TDA.Pila;
 // import TDA.Abb;   ← descomentar cuando Lucas entregue
 // import TDA.Avl;   ← descomentar cuando Lucas entregue
@@ -63,11 +62,11 @@ public class Main {
 
         // Usuarios — el constructor con ID actualiza el contador automáticamente
         // así el próximo usuario creado desde el menú arranca desde el 106
-        Usuario u1 = new Usuario(101, "Gabriel", "gaby@mail.com",   Usuario.TipoCuenta.PREMIUM);
-        Usuario u2 = new Usuario(102, "Lucas",   "lucas@mail.com",  Usuario.TipoCuenta.GRATUITO);
-        Usuario u3 = new Usuario(103, "Toto",    "tobias@mail.com", Usuario.TipoCuenta.GRATUITO);
-        Usuario u4 = new Usuario(104, "Nestor",  "nestor@mail.com", Usuario.TipoCuenta.PREMIUM);
-        Usuario u5 = new Usuario(105, "Brisa",   "brisa@mail.com",  Usuario.TipoCuenta.PREMIUM);
+        Usuario u1 = new Usuario("Gabriel", "gaby@mail.com",   Usuario.TipoCuenta.PREMIUM);
+        Usuario u2 = new Usuario("Lucas",   "lucas@mail.com",  Usuario.TipoCuenta.GRATUITO);
+        Usuario u3 = new Usuario("Toto",    "tobias@mail.com", Usuario.TipoCuenta.GRATUITO);
+        Usuario u4 = new Usuario("Nestor",  "nestor@mail.com", Usuario.TipoCuenta.PREMIUM);
+        Usuario u5 = new Usuario("Brisa",   "brisa@mail.com",  Usuario.TipoCuenta.PREMIUM);
 
         // Diccionario: registramos a cada usuario con su prioridad
         // getPrioridad() devuelve 1 si es PREMIUM, 0 si es GRATUITO

@@ -7,7 +7,7 @@ import TDA.ColaConPrioridad;
 import TDA.Pila;
 // import TDA.Abb;   ← descomentar cuando Lucas entregue
 // import TDA.Avl;   ← descomentar cuando Lucas entregue
-// import TDA.Grafo; ← descomentar cuando Nestor entregue
+import TDA.Grafo;
 
 import java.util.Scanner;
 
@@ -39,7 +39,7 @@ public class Main {
     static SoporteTecnico<String> soporte          = new SoporteTecnico<>();
 
     // ── TDA P5: descomentar cuando Nestor-Kawai entregue ─────────────────────
-    // static Grafo<Servidor> redCDN = new Grafo<>();
+    static Grafo<Servidor> redCDN = new Grafo<>();
 
     static Scanner scanner = new Scanner(System.in);
 
@@ -108,9 +108,19 @@ public class Main {
         // Usuarios activos — pendiente P2
         // usuariosActivos.insertar(u1); usuariosActivos.insertar(u4); usuariosActivos.insertar(u5);
 
-        // Red CDN — pendiente P5
-        // Servidor sBA = new Servidor("BA","Buenos Aires");
-        // redCDN.agregarVertice(sBA); redCDN.agregarArista(sBA, sMX, 120);
+        // Red CDN — Grafo de servidores CDN con latencia en ms (P5 ✅)
+        Servidor svBA = new Servidor("BA", "Buenos Aires");
+        Servidor svMX = new Servidor("MX", "México");
+        Servidor svNY = new Servidor("NY", "Nueva York");
+        Servidor svMD = new Servidor("MD", "Madrid");
+        Servidor svSP = new Servidor("SP", "São Paulo");
+        redCDN.agregarVertice(svBA);
+        redCDN.agregarVertice(svMX);
+        redCDN.agregarVertice(svNY);
+        redCDN.agregarVertice(svMD);
+        redCDN.agregarVertice(svSP);
+        redCDN.agregarArista(svBA, svMX, 120); // BA - México:     120ms
+        redCDN.agregarArista(svBA, svSP, 30);  // BA - São Paulo:   30ms
 
         System.out.println("✅ Datos de prueba cargados.");
     }
@@ -127,7 +137,7 @@ public class Main {
             System.out.println("║  2.  Usuarios activos    (AVL) ⏳         ║");
             System.out.println("║  3.  Catálogo creadores  (ABB) ⏳         ║");
             System.out.println("║  4.  Géneros musicales   (Árbol n-ario)  ║");
-            System.out.println("║  5.  Red CDN             (Grafo) ⏳        ║");
+            System.out.println("║  5.  Red CDN             (Grafo) ✅       ║");
             System.out.println("║  6.  Historial           (Pila)           ║");
             System.out.println("║  7.  Cola reproducción   (Cola)           ║");
             System.out.println("║  8.  Usuarios y planes   (Diccionario)    ║");
@@ -248,9 +258,27 @@ public class Main {
 
     // ── 5. GRAFO ──────────────────────────────────────────────────────────────
     static void menuGrafo() {
-        System.out.println("\n── Red CDN (Grafo) ── [⏳ Nestor-Kawai pendiente]");
-        System.out.println("  Falta: agregarVertice/agregarArista/BFS/DFS/vecinoMenorPeso.");
-        System.out.println("  Red esperada: BA--120ms--MX--80ms--NY, BA--200ms--SP--90ms--NY");
+        System.out.println("\n── Red CDN (Grafo) ──");
+        System.out.println("  Servidores: BA(Buenos Aires), MX(México), NY(Nueva York), MD(Madrid), SP(São Paulo)");
+        System.out.println("  1. BFS desde un servidor");
+        System.out.println("  2. DFS desde un servidor");
+        System.out.println("  3. Servidor con menor latencia desde BA");
+        System.out.print("  Opción: ");
+
+        switch (leerInt()) {
+            case 1 -> {
+                System.out.println("  BFS desde BA:");
+                System.out.println("  " + redCDN.BFS(new Servidor("BA", "Buenos Aires")));
+            }
+            case 2 -> {
+                System.out.println("  DFS desde BA:");
+                System.out.println("  " + redCDN.DFS(new Servidor("BA", "Buenos Aires")));
+            }
+            case 3 -> {
+                Servidor menor = redCDN.vecinoMenorPeso(new Servidor("BA", "Buenos Aires"));
+                System.out.println("  Servidor más cercano a BA: " + menor);
+            }
+        }
     }
 
     // ── 6. PILA ───────────────────────────────────────────────────────────────
@@ -497,13 +525,11 @@ public class Main {
             return;
         }
 
-        // PASO 3 — Grafo: BFS para ruta óptima
-        // TODO P5 → descomentar cuando Nestor-Kawai entregue Grafo.java:
-        // Servidor origen = new Servidor("BA", "Buenos Aires");
-        // List<Servidor> ruta = redCDN.BFS(origen);
-        // Servidor optimo = redCDN.vecinoMenorPeso(origen);
-        System.out.println("  [Grafo] Calculando ruta BFS... ⏳ P5 pendiente");
-        System.out.println("  → Resultado esperado: servidor vecino con menor latencia.");
+        // PASO 3 — Grafo: BFS para ruta óptima y servidor con menor latencia
+        Servidor svBA = new Servidor("BA", "Buenos Aires");
+        System.out.println("  [Grafo] BFS desde BA: " + redCDN.BFS(svBA));
+        Servidor optimo = redCDN.vecinoMenorPeso(svBA);
+        System.out.println("  [Grafo] ✅ Servidor con menor latencia desde BA: " + optimo);
     }
 
     /**

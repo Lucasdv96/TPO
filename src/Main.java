@@ -48,12 +48,18 @@ import java.util.Scanner;
 
     // Datos para probar de ejemplo
     static void cargarDatosPrueba() {
+        Categoria rock = new Categoria("Rock");
+        Categoria techno = new Categoria("Techno");
+        Categoria pop = new Categoria("Pop");
+        Categoria metal = new Categoria("Metal");
+        Categoria folk = new Categoria("Folk");
+
         // le pedi los ejemplos la IA ya me daba paja pensar
-        Cancion c1 = new Cancion(1, "Bohemian Rhapsody", "Queen",       "Rock",        354);
-        Cancion c2 = new Cancion(2, "Blinding Lights",   "The Weeknd",  "Pop",         200);
-        Cancion c3 = new Cancion(3, "Strobe",            "deadmau5",    "Electrónica", 601);
-        Cancion c4 = new Cancion(4, "La Llorona",        "Chavela Vargas","Folk",      218);
-        Cancion c5 = new Cancion(5, "Smells Like Teen Spirit","Nirvana", "Rock",       301);
+        Cancion c1 = new Cancion(1, "Bohemian Rhapsody", "Queen",       rock,        354);
+        Cancion c2 = new Cancion(2, "Blinding Lights",   "The Weeknd",  pop,         200);
+        Cancion c3 = new Cancion(3, "Strobe",            "deadmau5",    techno, 601);
+        Cancion c4 = new Cancion(4, "La Llorona",        "Chavela Vargas",folk,      218);
+        Cancion c5 = new Cancion(5, "Smells Like Teen Spirit","Nirvana", metal,       301);
 
         // Usuarios
         Usuario u1 = new Usuario(101, "Gabriel",  "gaby@mail.com",   Usuario.TipoCuenta.PREMIUM);
@@ -222,16 +228,17 @@ import java.util.Scanner;
 
         switch (leerInt()) {
             case 1 -> {
-                catalogoHistorico.insertar(new Cancion(20, "Bohemian Rhapsody", "Queen", "Rock", 354));
-                catalogoHistorico.insertar(new Cancion(40, "Blinding Lights", "The Weeknd", "Pop", 200));
-                catalogoHistorico.insertar(new Cancion(30, "Strobe", "deadmau5", "Electrónica", 601));
-                catalogoHistorico.insertar(new Cancion(25, "La Llorona", "Chavela Vargas", "Folk", 218));
+//                catalogoHistorico.insertar(new Cancion(20, "Bohemian Rhapsody", "Queen", "Rock", 354));
+//                catalogoHistorico.insertar(new Cancion(40, "Blinding Lights", "The Weeknd", "Pop", 200));
+//                catalogoHistorico.insertar(new Cancion(30, "Strobe", "deadmau5", "Electrónica", 601));
+//                catalogoHistorico.insertar(new Cancion(25, "La Llorona", "Chavela Vargas", "Folk", 218));
                 System.out.println(" Canciones insertadas con éxito!");
             }
             case 2 -> {
                 System.out.print("  Ingresá el ID de la canción a buscar: ");
                 int idBusqueda = leerInt();
-                boolean encontrada = catalogoHistorico.buscar(new Cancion(idBusqueda, "", "", "", 0));
+                Categoria ashe = new Categoria("ashe");
+                boolean encontrada = catalogoHistorico.buscar(new Cancion(idBusqueda, "", "", ashe, 0));
                 if (encontrada) {
                     System.out.println("Cancion "+ idBusqueda + " encontrada en el Árbol B!");
                 } else {
@@ -311,13 +318,13 @@ import java.util.Scanner;
     static void menuCola() {
         System.out.println("\n── Cola de Reproducción (Cola) ── [P4]");
         // TODO P4: enqueue/dequeue/front
-        Cancion c1 = new Cancion(1, "Bohemian Rhapsody", "Queen",       "Rock",        354);
-        Cancion c2 = new Cancion(2, "Blinding Lights",   "The Weeknd",  "Pop",         200);
-        Cancion c3 = new Cancion(3, "Strobe",            "deadmau5",    "Electrónica", 601);
+//        Cancion c1 = new Cancion(1, "Bohemian Rhapsody", "Queen",       "Rock",        354);
+//        Cancion c2 = new Cancion(2, "Blinding Lights",   "The Weeknd",  "Pop",         200);
+//        Cancion c3 = new Cancion(3, "Strobe",            "deadmau5",    "Electrónica", 601);
         colaReproduccion.isEmpty();
-        colaReproduccion.enqueue(c1);
-        colaReproduccion.enqueue(c2);
-        colaReproduccion.enqueue(c3);
+//        colaReproduccion.enqueue(c1);
+//        colaReproduccion.enqueue(c2);
+//        colaReproduccion.enqueue(c3);
 
         while(!colaReproduccion.isEmpty()){
             System.out.println("\n Siguente Cancion: " + colaReproduccion.front().getTitulo());

@@ -12,6 +12,11 @@ import java.util.List;
 public class Usuario implements Comparable<Usuario> {
 
     public Integer getPrioridad() {
+        if (tipoCuenta == TipoCuenta.PREMIUM) {
+            return 1;
+        } else {
+            return 0;
+        }
     }
 
     // le pase el codigo a claudio para ver si estaba bien y me agrego esto, si les gusta lo sacamos y si no vuela

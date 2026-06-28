@@ -1,15 +1,10 @@
 import Clases.*;
-import TDA.Diccionario;
+import TDA.*;
 
 // Cuando los terminan descomentan el TDA que hicieron
 // import TDA.Abb;
 // import TDA.Avl;
-import TDA.ArbolB;
-import TDA.ArbolGenerico;
 // import TDA.Grafo;
-import TDA.Cola;
-import TDA.ColaConPrioridad;
-import TDA.Pila;
 
 import java.util.Scanner;
 
@@ -41,7 +36,7 @@ import java.util.Scanner;
     static ColaConPrioridad<Stream> colaTranscoding = new ColaConPrioridad<>();
 
     // TDA de P5 (Nada lo mismo que lo de arriba ya me da paja escribir)
-    // static Grafo<Servidor> redCDN = new Grafo<>();
+    static Grafo<Servidor> redCDN = new Grafo<>();
 
     //Scanner ya habiamos usado con toto, esta medio rustico y medio con Ia pero se puede mejorar.
     static Scanner scanner = new Scanner(System.in);
@@ -90,9 +85,25 @@ import java.util.Scanner;
         // TODO P4: apilar pantalla inicial en Pila
         pilaNavegacion.push("INICIO");
 
+
         // TODO P5: construir red CDN en Grafo
-        // Servidor sBA = new Servidor("BA","Buenos Aires"); ...
-        // redCDN.agregarVertice(sBA); redCDN.agregarArista(sBA, sMX, 120);
+        Servidor svBA = new Servidor("BA", "Buenos Aires");
+        Servidor svMX = new Servidor("MX", "México");
+        Servidor svNY = new Servidor("NY", "Nueva York");
+        Servidor svMD = new Servidor("MD", "Madrid");
+        Servidor svSP = new Servidor("SP", "São Paulo");
+
+        redCDN.agregarVertice(svBA);
+        redCDN.agregarVertice(svMX);
+        redCDN.agregarVertice(svNY);
+        redCDN.agregarVertice(svMD);
+        redCDN.agregarVertice(svSP);
+
+        redCDN.agregarArista(svBA, svMX, 120);   // BA ↔ México: 120ms
+        redCDN.agregarArista(svBA, svSP, 30);    // BA ↔ São Paulo: 30ms  ← más cercano a BA
+        redCDN.agregarArista(svMX, svNY, 50);    // México ↔ NY: 50ms
+        redCDN.agregarArista(svNY, svMD, 80);    // NY ↔ Madrid: 80ms
+        redCDN.agregarArista(svMD, svSP, 200);   // Madrid ↔ São Paulo: 200ms
 
         System.out.println("Datos de prueba subidos perfectamente.");
     }
@@ -157,14 +168,18 @@ import java.util.Scanner;
                         }
                     }
                     if (streamActivo == null) {
-                        System.out.println("  [Diccionario] ❌ No hay stream activo para ese usuario.");
+                        System.out.println("  Diccionario No hay stream activo para ese usuario.");
                     } else {
-                        System.out.println("  [Diccionario] ✅ Stream encontrado: " + streamActivo);
+                        System.out.println("  Diccionario Stream encontrado: " + streamActivo);
 
                         // Paso 3: BFS en el Grafo CDN para encontrar servidor con menor latencia
                         // TODO P5: List<Servidor> ruta = redCDN.BFS(servidorOrigen);
-                        System.out.println("  [Grafo] Calculando ruta BFS... ⏳ P5 pendiente");
-                        System.out.println("  ─ Resultado esperado: servidor más cercano con menor latencia.");
+                        Servidor servidorOrigen = new Servidor("BA", "Buenos Aires"); // servidor base
+                        Servidor servidorOptimo = redCDN.vecinoMenorPeso(servidorOrigen);
+                        if (servidorOptimo != null)
+                            System.out.println("  Grafo Servidor óptimo para el stream: " + servidorOptimo);
+                        else
+                            System.out.println("  Grafo No se encontró servidor disponible.");
                     }
                 }
                 case 11 -> consultaC2();
@@ -298,11 +313,61 @@ import java.util.Scanner;
         }
     }
 
-    static void menuGrafo() {
-        System.out.println("\n── Red CDN (Grafo) ── [P5]");
-        // TODO P5: agregarVertice/agregarArista/BFS/DFS
-        System.out.println("  ⏳ Pendiente — P5 entrega esta semana.");
+static void menuGrafo() {
+    System.out.println("\n── Red CDN (Grafo) ──");
+    System.out.println("  1. Mostrar red completa (BFS)");
+    System.out.println("  2. Explorar red en profundidad (DFS)");
+    System.out.println("  3. Servidor más cercano desde un origen");
+    System.out.print("  Opción: ");
+
+    switch (leerInt()) {
+        case 1 -> {
+            System.out.println("  Seleccioná el servidor origen:");
+            System.out.println("    1. Buenos Aires (BA)");
+            System.out.println("    2. México (MX)");
+            System.out.println("    3. Nueva York (NY)");
+            System.out.println("    4. Madrid (MD)");
+            System.out.println("    5. São Paulo (SP)");
+            System.out.print("  Opción: ");
+
+            String id;
+            switch (leerInt()) {
+                case 1 -> id = "BA";
+                case 2 -> id = "MX";
+                case 3 -> id = "NY";
+                case 4 -> id = "MD";
+                case 5 -> id = "SP";
+                default -> {
+                    System.out.println("  Opción inválida.");
+                    return;
+                }
+            }
+
+            Servidor origen = new Servidor(id, "");
+            List<Servidor> recorrido = redCDN.BFS(origen);
+            System.out.println("  Recorrido BFS:");
+            for (Servidor s : recorrido) System.out.println("    → " + s);
+        }
+        case 2 -> {
+            System.out.print("  ID servidor origen (BA/MX/NY/MD/SP): ");
+            String id = scanner.next();
+            Servidor origen = new Servidor(id, "");
+            List<Servidor> recorrido = redCDN.DFS(origen);
+            System.out.println("  Recorrido DFS:");
+            for (Servidor s : recorrido) System.out.println("→ " + s);
+        }
+        case 3 -> {
+            System.out.print("  ID servidor origen (BA/MX/NY/MD/SP): ");
+            String id = scanner.next();
+            Servidor origen = new Servidor(id, "");
+            Servidor cercano = redCDN.vecinoMenorPeso(origen);
+            if (cercano != null)
+                System.out.println("Servidor más cercano: " + cercano);
+            else
+                System.out.println(" Sin vecinos.");
+        }
     }
+}
 
     static void menuPila() {
         System.out.println("\n── Historial de Navegación (Pila) ── [P4]");

@@ -32,7 +32,6 @@ import java.util.Set;
  * ESPACIO: O(n) donde n = cantidad de usuarios registrados.
  */
 public class Diccionario<K, V> implements iDiccionario<K, V> {
-
     // HashMap interno — estructura que hace el trabajo real
     private HashMap<K, V> mapa;
 
@@ -40,7 +39,6 @@ public class Diccionario<K, V> implements iDiccionario<K, V> {
     public Diccionario() {
         this.mapa = new HashMap<>();
     }
-
     /**
      * Registra o actualiza la prioridad de un usuario.
      * Si ya existe, actualiza. Si no, lo agrega.
@@ -57,6 +55,7 @@ public class Diccionario<K, V> implements iDiccionario<K, V> {
      */
     @Override
     public V get(K clave) {
+
         return mapa.get(clave);
     }
 
@@ -65,6 +64,7 @@ public class Diccionario<K, V> implements iDiccionario<K, V> {
      */
     @Override
     public void remove(K clave) {
+
         mapa.remove(clave);
     }
 
@@ -74,23 +74,27 @@ public class Diccionario<K, V> implements iDiccionario<K, V> {
      */
     @Override
     public boolean contains(K clave) {
+
         return mapa.containsKey(clave);
     }
 
     /** Retorna la cantidad de usuarios registrados. */
     @Override
     public int size() {
+
         return mapa.size();
     }
 
     /** Indica si no hay usuarios registrados. */
     @Override
     public boolean isEmpty() {
+
         return mapa.isEmpty();
     }
 
     /** Retorna todos los IDs registrados. Útil para iterar. */
     public Set<K> claves() {
+
         return mapa.keySet();
     }
 

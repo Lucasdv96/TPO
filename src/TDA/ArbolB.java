@@ -56,26 +56,28 @@ public class ArbolB <T extends Comparable<T>> implements iArbolB <T>{
         int i = nodo.claves.size() - 1;
 
         if (nodo.esHoja){
-            /*
+            int posicion = 0;
+        /*
         EJEMPLO: si tengo [20|30] y la clave nueva es: 25;
-        empiezo a recorrer desde el 30 y comparo si 25 es menor a 30.
-        Si es asi, desplazo el 30 a la derecha y lo "clono" -> [20|30|30].
-        Y sigo recorriendo...
-         */
+        Recorremos de izquierda a derecha (adelante hacia atrás).
+        Como 25 es mayor que 20, posicion avanza a 1.
+        Como 25 NO es mayor que 30, el bucle frena ahí.
+        */
 
-            while (i >= 0 && clave.compareTo(nodo.claves.get(i)) < 0){
-                nodo.claves.set(i + 1, nodo.claves.get(i));
-                i--;
+            while (posicion < nodo.claves.size() && clave.compareTo(nodo.claves.get(posicion)) > 0){
+                posicion++;
             }
 
         /*
-        Aca se inserta el 25 en la lista de claves.
+        Aca se inserta el 25 en la lista de claves en la posicion 1.
         [20|25|30] (lo que me costo entender esto chicos 😩)
         */
-            nodo.claves.set(i + 1, clave);
+            nodo.claves.add(posicion, clave);
             nodo.n++;
 
         } else{
+            //si el nodo no es hoja.
+            //aca si recorremos de atras para adelante
                 while (i >= 0 && clave.compareTo(nodo.claves.get(i)) < 0){
                     i--;
                 }
@@ -160,12 +162,32 @@ public class ArbolB <T extends Comparable<T>> implements iArbolB <T>{
 
     @Override
     public void mostrar() {
-        //me queda pendiente esta wey.
+        if (esVacio()) {
+            System.out.println("El arbol está vacio.");
+            return;
+        }
+        mostrarRec(raiz);
+        System.out.println();
+    }
+
+    private void mostrarRec(NodoB<T> nodo) {
+        if (nodo == null) return;
+
+        int i;
+        for (i = 0; i < nodo.claves.size(); i++) {
+            if (!nodo.esHoja) {
+                mostrarRec(nodo.hijos.get(i));
+            }
+            System.out.print(nodo.claves.get(i) + " | ");
+        }
+
+        if (!nodo.esHoja) {
+            mostrarRec(nodo.hijos.get(i));
+        }
     }
 
     @Override
     public boolean esVacio() {
         return raiz == null || (raiz.claves.isEmpty() && raiz.esHoja);
     }
-
 }

@@ -2,9 +2,7 @@ package TDA;
 
 import Interfaces.iGrafo;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Grafo <T> implements iGrafo<T> {
     private Map<T, Vertice<T>> vertices;
@@ -29,22 +27,72 @@ public class Grafo <T> implements iGrafo<T> {
     }
 
     @Override
-    public List BFS(T origen) {
-        return List.of();
+    public List<T> BFS(T origen) {
+        // Lista en orden de los visitados
+        List<T> resultado = new ArrayList<>();
+        Vertice<T> inicio = vertices.get(origen);
+
+        if (inicio == null) return resultado;// Si no existe retorna null para no romper
+        Set<T> visitados = new HashSet<>();  // Set para marcar qué vértices ya fueron visitados (evita repeticiones)
+
+        Cola<Vertice<T>> cola = new Cola<>();
+        cola.enqueue(inicio);
+        visitados.add(inicio.dato);
+
+        // Mientras queden vértices pendientes de procesar...
+        while (!cola.isEmpty()) {
+
+            // saca el vértice que está al frente de la cola y lo guarda en la variable actual
+            Vertice<T> actual = cola.dequeue();
+            resultado.add(actual.dato);
+
+            for (Arista<T> arista : actual.vecinos) {
+                if (!visitados.contains(arista.destino.dato)) {
+                    visitados.add(arista.destino.dato);
+                    cola.enqueue(arista.destino);
+                }
+            }
+        }
+        return resultado;
+    }
+    @Override
+    public List<T> DFS(T origen) {
+        List<T> resultado = new ArrayList<>();
+        Vertice<T> inicio = vertices.get(origen);
+        if (inicio == null) return resultado;
+
+        Set<T> visitados = new HashSet<>();
+        dfsRecursivo(inicio, visitados, resultado);
+        return resultado;
     }
 
-    @Override
-    public List DFS(T origen) {
-        return List.of();
+    private void dfsRecursivo(Vertice<T> actual, Set<T> visitados, List<T> resultado) {
+        visitados.add(actual.dato);
+        resultado.add(actual.dato);
+        for (Arista<T> arista : actual.vecinos) {
+            if (!visitados.contains(arista.destino.dato)) {
+                dfsRecursivo(arista.destino, visitados, resultado);
+            }
+        }
     }
 
     @Override
     public T vecinoMenorPeso(T origen) {
-        return null;
+        Vertice<T> inicio = vertices.get(origen);
+        if (inicio == null || inicio.vecinos.isEmpty()) return null;
+
+        Arista<T> menor = null;
+        for (Arista<T> arista : inicio.vecinos) {
+            if (menor == null || arista.peso < menor.peso) {
+                menor = arista;
+            }
+        }
+        return menor.destino.dato;
     }
 
     @Override
     public boolean esVacio() {
-        return false;
+
+        return vertices.isEmpty();
     }
 }

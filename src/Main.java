@@ -45,9 +45,13 @@ import java.util.Scanner;
 
     //Scanner ya habiamos usado con toto, esta medio rustico y medio con Ia pero se puede mejorar.
     static Scanner scanner = new Scanner(System.in);
+    static final SoporteTecnico<Object> soporte = new SoporteTecnico<>();
 
     // Datos para probar de ejemplo
     static void cargarDatosPrueba() {
+
+        SoporteTecnico soporteTecnico = new SoporteTecnico<>();
+
         // le pedi los ejemplos la IA ya me daba paja pensar
         Cancion c1 = new Cancion(1, "Bohemian Rhapsody", "Queen",       "Rock",        354);
         Cancion c2 = new Cancion(2, "Blinding Lights",   "The Weeknd",  "Pop",         200);
@@ -91,31 +95,31 @@ import java.util.Scanner;
     }
 
     // menu principal para el "usuario"
-    void main(String[] args) {
+    void main(String[] args) throws InterruptedException {
         cargarDatosPrueba();
         int opcion;
         do {
-            System.out.println("\n╔══════════════════════════════════════╗");
-            System.out.println("║   SISTEMA DE STREAMING DE AUDIO      ║");
-            System.out.println("╠══════════════════════════════════════╣");
-            System.out.println("║  1. Gestión de canciones (Árbol B)   ║");
-            System.out.println("║  2. Gestión de usuarios (AVL)        ║");
-            System.out.println("║  3. Catálogo de canales (ABB)        ║");
-            System.out.println("║  4. Géneros musicales (Árbol n-ario) ║");
-            System.out.println("║  5. Red CDN (Grafo)                  ║");
-            System.out.println("║  6. Historial navegación (Pila)      ║");
-            System.out.println("║  7. Cola de reproducción (Cola)      ║");
-            System.out.println("║  8. Transcodificación (Cola Prior.)  ║");
-            System.out.println("║  9. Streams activos (Diccionario)    ║");
-            System.out.println("╠══════════════════════════════════════╣");
-            System.out.println("║  CONSULTAS COMPLEJAS                 ║");
-            System.out.println("║  10. C1: Ruta óptima de servidor     ║");
-            System.out.println("║  11. C2: Procesar transcodificación  ║");
-            System.out.println("║  12. C3: Deshacer navegación         ║");
-            System.out.println("║  13. C4: Explorar género y encolar   ║");
-            System.out.println("╠══════════════════════════════════════╣");
-            System.out.println("║  0. Salir                            ║");
-            System.out.println("╚══════════════════════════════════════╝");
+            System.out.println("\n╔══════════════════════════════════════════╗");
+            System.out.println("║   SISTEMA DE STREAMING DE AUDIO          ║");
+            System.out.println("╠══════════════════════════════════════════╣");
+            System.out.println("║  1. Gestión de canciones (Árbol B)       ║");
+            System.out.println("║  2. Gestión de usuarios (AVL)            ║");
+            System.out.println("║  3. Catálogo de canales (ABB)            ║");
+            System.out.println("║  4. Géneros musicales (Árbol n-ario)     ║");
+            System.out.println("║  5. Red CDN (Grafo)                      ║");
+            System.out.println("║  6. Historial navegación (Pila)          ║");
+            System.out.println("║  7. Cola de reproducción (Cola)          ║");
+            System.out.println("║  8. Streams activos (Diccionario)        ║");
+            System.out.println("║  9. Solucion de Problemas (Cola Prior.)  ║");
+            System.out.println("╠══════════════════════════════════════════╣");
+            System.out.println("║  CONSULTAS COMPLEJAS                     ║");
+            System.out.println("║  10. C1: Ruta óptima de servidor         ║");
+            System.out.println("║  11. C2: Procesar transcodificación      ║");
+            System.out.println("║  12. C3: Deshacer navegación             ║");
+            System.out.println("║  13. C4: Explorar género y encolar       ║");
+            System.out.println("╠══════════════════════════════════════════╣");
+            System.out.println("║  0. Salir                                ║");
+            System.out.println("╚══════════════════════════════════════════╝");
             System.out.print("  Opción: ");
 
             // no se es esto, lo hizo claudio
@@ -129,8 +133,8 @@ import java.util.Scanner;
                 case 5  -> menuGrafo();
                 case 6  -> menuPila();
                 case 7  -> menuCola();
-                case 8  -> menuColaConPrioridad();
-                case 9  -> menuDiccionario();
+                case 8  -> menuDiccionario();
+                case 9  -> menuColaConPrioridad();
                 case 10 -> {
                     System.out.println("\n── C1: Ruta óptima de servidor ──");
                     System.out.print("  Ingresá el ID de usuario: ");
@@ -163,7 +167,10 @@ import java.util.Scanner;
                 case 11 -> consultaC2();
                 case 12 -> consultaC3();
                 case 13 -> consultaC4();
-                case 0  -> System.out.println("\nHasta la proximaa.");
+                case 0  -> {
+                    System.out.println("\nHasta la proximaa.");
+                    scanner.close();
+                }
                 default -> System.out.println("Opción inválida.");
             }
         } while (opcion != 0);
@@ -329,11 +336,39 @@ import java.util.Scanner;
         System.out.println("  ⏳ Pendiente — P4 entrega esta semana.");
     }
 
-    static void menuColaConPrioridad() {
-        System.out.println("\n── Transcodificación (Cola con Prioridad) ── [P4]");
-        // TODO P4: insert/extractMax/peek
+    static void menuColaConPrioridad() throws InterruptedException {
+        System.out.println("\n── Solucion de Problemas (Cola con Prioridad) ── [P4]");
 
-        System.out.println("  ⏳ Pendiente — P4 entrega esta semana.");
+
+        // TODO P4: insert/extractMax/peek
+        System.out.println("  1. Reportar Problema/Queja");
+        System.out.println("  2. Visualizar siguiente Problema");
+        System.out.println("  3. Solucionar Problema");
+        System.out.print("  Opción: ");
+        switch (leerInt()){
+            case 1 ->{
+                scanner.nextLine();
+                System.out.print("Problema: ");
+                String problema = leerString();
+
+                System.out.print("Prioridad (0 o 1): ");
+                int prioridad = leerInt();
+
+                soporte.reportarProblema(problema, prioridad);
+                System.out.println("Hemos recibido su inconveniente, pronto lo solucionaremos");
+                System.out.println();
+
+            }
+            case 2 ->{
+                Object problema = soporte.proxProblema();
+                System.out.println("El proximo problema a resolver es: " + problema);
+            }
+            case 3 ->{
+                soporte.arreglarProblema();
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + leerInt());
+        }
+
     }
 
     // Los submenus los hizo la IA, igual los mire y creo que estan bastante bien
@@ -411,4 +446,11 @@ import java.util.Scanner;
             scanner.next();
         }
         return scanner.nextInt();
+    }
+    static String leerString() {
+        while (!scanner.hasNextLine()) {
+            System.out.print("  ⚠ Ingresá un número: ");
+            scanner.next();
+        }
+        return scanner.nextLine();
     }

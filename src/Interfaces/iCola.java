@@ -7,7 +7,7 @@ package Interfaces;
  * Complejidad: O(1) para todas las operaciones.
  */
 
-// haceme la cola profe 😁😁😁
+
 public interface iCola<T> {
 
     // Encola el dato que quieras agregar
@@ -21,5 +21,4 @@ public interface iCola<T> {
 
     boolean isEmpty();
 
-//Toto comentalo vos tirame la goma vos sabes, you know baby
 }

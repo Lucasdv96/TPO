@@ -2,7 +2,7 @@ package TDA;
 
 import Interfaces.iAvl;
 
-public class Avl<T> implements iAvl<T> {
+public class Avl<T extends Comparable<T>> implements iAvl<T> {
 
     private NodoAVL<T> raiz;
 
@@ -57,8 +57,10 @@ public class Avl<T> implements iAvl<T> {
 
     private NodoAVL<T> insertar(NodoAVL<T> nodo, T dato) {
         //1. insercion normal igual que ABB
-        if(nodo == null) return new NodoAVL<>(dato);
+        if(nodo == null)
+            return new NodoAVL<>(dato);
 
+        return nodo;
     }
 
     @Override

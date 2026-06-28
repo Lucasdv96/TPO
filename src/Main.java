@@ -9,6 +9,7 @@ import TDA.Pila;
 // import TDA.Avl;   ← descomentar cuando Lucas entregue
 import TDA.Grafo;
 
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -108,21 +109,27 @@ public class Main {
         // Usuarios activos — pendiente P2
         // usuariosActivos.insertar(u1); usuariosActivos.insertar(u4); usuariosActivos.insertar(u5);
 
-        // Red CDN — Grafo de servidores CDN con latencia en ms (P5 ✅)
+        // TODO P5: construir red CDN en Grafo
+        // Red CDN — P5
         Servidor svBA = new Servidor("BA", "Buenos Aires");
         Servidor svMX = new Servidor("MX", "México");
         Servidor svNY = new Servidor("NY", "Nueva York");
         Servidor svMD = new Servidor("MD", "Madrid");
         Servidor svSP = new Servidor("SP", "São Paulo");
+
         redCDN.agregarVertice(svBA);
         redCDN.agregarVertice(svMX);
         redCDN.agregarVertice(svNY);
         redCDN.agregarVertice(svMD);
         redCDN.agregarVertice(svSP);
-        redCDN.agregarArista(svBA, svMX, 120); // BA - México:     120ms
-        redCDN.agregarArista(svBA, svSP, 30);  // BA - São Paulo:   30ms
 
-        System.out.println("✅ Datos de prueba cargados.");
+        redCDN.agregarArista(svBA, svMX, 120);  // BA - México: 120ms
+        redCDN.agregarArista(svBA, svSP, 30);   // BA - São Paulo: 30ms
+        redCDN.agregarArista(svMX, svNY, 50);   // México - NY: 50ms
+        redCDN.agregarArista(svNY, svMD, 80);   // NY - Madrid: 80ms
+        redCDN.agregarArista(svMD, svSP, 200);  // Madrid - São Paulo: 200ms
+
+        System.out.println("Datos de prueba subidos perfectamente.");
     }
 
     // ── Menú principal ────────────────────────────────────────────────────────
@@ -259,25 +266,90 @@ public class Main {
     // ── 5. GRAFO ──────────────────────────────────────────────────────────────
     static void menuGrafo() {
         System.out.println("\n── Red CDN (Grafo) ──");
-        System.out.println("  Servidores: BA(Buenos Aires), MX(México), NY(Nueva York), MD(Madrid), SP(São Paulo)");
-        System.out.println("  1. BFS desde un servidor");
-        System.out.println("  2. DFS desde un servidor");
-        System.out.println("  3. Servidor con menor latencia desde BA");
+        System.out.println("  1. Mostrar red completa (BFS)");
+        System.out.println("  2. Explorar red en profundidad (DFS)");
+        System.out.println("  3. Servidor más cercano desde un origen");
         System.out.print("  Opción: ");
 
         switch (leerInt()) {
             case 1 -> {
-                System.out.println("  BFS desde BA:");
-                System.out.println("  " + redCDN.BFS(new Servidor("BA", "Buenos Aires")));
+                System.out.println("  Seleccioná el servidor origen:");
+                System.out.println("    1. Buenos Aires (BA)");
+                System.out.println("    2. México (MX)");
+                System.out.println("    3. Nueva York (NY)");
+                System.out.println("    4. Madrid (MD)");
+                System.out.println("    5. São Paulo (SP)");
+                System.out.print("  Opción: ");
+
+                String id;
+                switch (leerInt()) {
+                    case 1 -> id = "BA";
+                    case 2 -> id = "MX";
+                    case 3 -> id = "NY";
+                    case 4 -> id = "MD";
+                    case 5 -> id = "SP";
+                    default -> { System.out.println("  Opción inválida."); return; }
+                }
+
+                Servidor origen = new Servidor(id, "");
+                List<Servidor> recorrido = redCDN.BFS(origen);
+                System.out.println("  Recorrido BFS:");
+                for (Servidor s : recorrido) System.out.println("    → " + s);
             }
+
             case 2 -> {
-                System.out.println("  DFS desde BA:");
-                System.out.println("  " + redCDN.DFS(new Servidor("BA", "Buenos Aires")));
+                System.out.println("  Seleccioná el servidor origen:");
+                System.out.println("    1. Buenos Aires (BA)");
+                System.out.println("    2. México (MX)");
+                System.out.println("    3. Nueva York (NY)");
+                System.out.println("    4. Madrid (MD)");
+                System.out.println("    5. São Paulo (SP)");
+                System.out.print("  Opción: ");
+
+                String id;
+                switch (leerInt()) {
+                    case 1 -> id = "BA";
+                    case 2 -> id = "MX";
+                    case 3 -> id = "NY";
+                    case 4 -> id = "MD";
+                    case 5 -> id = "SP";
+                    default -> { System.out.println("  Opción inválida."); return; }
+                }
+
+                Servidor origen = new Servidor(id, "");
+                List<Servidor> recorrido = redCDN.DFS(origen);
+                System.out.println("  Recorrido DFS:");
+                for (Servidor s : recorrido) System.out.println("    → " + s);
             }
+
             case 3 -> {
-                Servidor menor = redCDN.vecinoMenorPeso(new Servidor("BA", "Buenos Aires"));
-                System.out.println("  Servidor más cercano a BA: " + menor);
+                System.out.println("  Seleccioná el servidor origen:");
+                System.out.println("    1. Buenos Aires (BA)");
+                System.out.println("    2. México (MX)");
+                System.out.println("    3. Nueva York (NY)");
+                System.out.println("    4. Madrid (MD)");
+                System.out.println("    5. São Paulo (SP)");
+                System.out.print("  Opción: ");
+
+                String id;
+                switch (leerInt()) {
+                    case 1 -> id = "BA";
+                    case 2 -> id = "MX";
+                    case 3 -> id = "NY";
+                    case 4 -> id = "MD";
+                    case 5 -> id = "SP";
+                    default -> { System.out.println("  Opción inválida."); return; }
+                }
+
+                Servidor origen = new Servidor(id, "");
+                Servidor cercano = redCDN.vecinoMenorPeso(origen);
+                if (cercano != null)
+                    System.out.println("Servidor más cercano: " + cercano);
+                else
+                    System.out.println("Sin vecinos.");
             }
+
+            default -> System.out.println("Opción inválida.");
         }
     }
 

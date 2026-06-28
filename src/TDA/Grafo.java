@@ -35,21 +35,21 @@ public class Grafo <T> implements iGrafo<T> {
         if (inicio == null) return resultado;// Si no existe retorna null para no romper
         Set<T> visitados = new HashSet<>();  // Set para marcar qué vértices ya fueron visitados (evita repeticiones)
 
-        Queue<Vertice<T>> cola = new LinkedList<>();
-        cola.add(inicio);
+        Cola<Vertice<T>> cola = new Cola<>();
+        cola.enqueue(inicio);
         visitados.add(inicio.dato);
 
         // Mientras queden vértices pendientes de procesar...
         while (!cola.isEmpty()) {
 
             // saca el vértice que está al frente de la cola y lo guarda en la variable actual
-            Vertice<T> actual = cola.poll();
+            Vertice<T> actual = cola.dequeue();
             resultado.add(actual.dato);
 
             for (Arista<T> arista : actual.vecinos) {
                 if (!visitados.contains(arista.destino.dato)) {
                     visitados.add(arista.destino.dato);
-                    cola.add(arista.destino);
+                    cola.enqueue(arista.destino);
                 }
             }
         }
@@ -81,13 +81,13 @@ public class Grafo <T> implements iGrafo<T> {
         Vertice<T> inicio = vertices.get(origen);
         if (inicio == null || inicio.vecinos.isEmpty()) return null;
 
-        Arista<T> mejor = null;
+        Arista<T> menor = null;
         for (Arista<T> arista : inicio.vecinos) {
-            if (mejor == null || arista.peso < mejor.peso) {
-                mejor = arista;
+            if (menor == null || arista.peso < menor.peso) {
+                menor = arista;
             }
         }
-        return mejor.destino.dato;
+        return menor.destino.dato;
     }
 
     @Override

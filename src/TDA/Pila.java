@@ -11,6 +11,8 @@ public class Pila<T> implements iPila<T> {
     /**
      * Se agrega el dato al tope de la pila
      * en caso de que sea nulo el dato directamente no agrega nada y se va a la casa
+     *
+     * @param dato elemento a apilar
      * */
     @Override
     public void push(T dato) {
@@ -27,6 +29,8 @@ public class Pila<T> implements iPila<T> {
     /**
      * Se saca el ultimo dato agregado, se retorna y se borra de chill
      * en caso de que este vacia te tira corte que haces flaquito
+     *
+     * @return Ultimo dato agregado o null si esta vacia
      * */
     @Override
     public T pop() {
@@ -40,8 +44,9 @@ public class Pila<T> implements iPila<T> {
     }
 
     /**
-     * Aca se pregunta quien es el Peek de la comedia y claramente salgo yo
-     * simplemente devuelve el ultimo dato agregado o null si esta vacia
+     * Devuelve el ultimo dato agregado sin eliminarlo
+     *
+     * @return Ultimo elemento agregado o null si esta vacia
      * */
     @Override
     public T peek() {
@@ -50,6 +55,8 @@ public class Pila<T> implements iPila<T> {
     }
     /**
      * se fija si esta vacia la pila, no es mucha ciencia
+     *
+     * @return true si esta vacia o false en caso contrario
      * */
     @Override
     public boolean isEmpty() {

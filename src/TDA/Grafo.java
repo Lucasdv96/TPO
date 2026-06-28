@@ -92,6 +92,7 @@ public class Grafo <T> implements iGrafo<T> {
 
     @Override
     public boolean esVacio() {
+
         return vertices.isEmpty();
     }
 }

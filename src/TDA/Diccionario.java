@@ -31,12 +31,15 @@ import java.util.Set;
  * COMPLEJIDAD: O(1) amortizado para todas las operaciones.
  * ESPACIO: O(n) donde n = cantidad de usuarios registrados.
  */
+
+
 public class Diccionario<K, V> implements iDiccionario<K, V> {
     // HashMap interno — estructura que hace el trabajo real
     private HashMap<K, V> mapa;
 
     /** Crea un diccionario vacío. */
     public Diccionario() {
+
         this.mapa = new HashMap<>();
     }
     /**
@@ -129,6 +132,7 @@ public class Diccionario<K, V> implements iDiccionario<K, V> {
      * Recorre los valores con un for-each y suma manualmente.
      * O(n)
      */
+
     public int cantPremium() {
         int cantidad = 0;
         // Recorremos todos los valores del mapa

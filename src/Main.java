@@ -36,6 +36,8 @@ public class Main {
     static SoporteTecnico<String> soporte          = new SoporteTecnico<>();
     static ArrayList<Cancion> listaGlobalCanciones = new ArrayList<>();
     static ArrayList<Usuario> listaGlobalUsuarios  = new ArrayList<>();
+    static ArrayList<Categoria> listaGlobalCategoria  = new ArrayList<>();
+    static ArrayList<Servidor> listaGlobalServidores  = new ArrayList<>();
 
     // ── TDA P5: descomentar cuando Nestor-Kawai entregue ─────────────────────
     static Grafo<Servidor> redCDN = new Grafo<>();
@@ -43,16 +45,12 @@ public class Main {
     static Scanner scanner = new Scanner(System.in);
 
     // ── Categorías globales para reutilizar ───────────────────────────────────
-    static Categoria musica   = new Categoria("Musica");
-    static Categoria rock   = new Categoria("Rock");
-    static Categoria techno = new Categoria("Techno");
-    static Categoria pop    = new Categoria("Pop");
-    static Categoria metal  = new Categoria("Metal");
-    static Categoria folk   = new Categoria("Folk");
-    static Categoria nacional   = new Categoria("Nacional");
-    static Categoria internacional   = new Categoria("Internacional");
-    static Categoria house   = new Categoria("House");
-    static Categoria deepHouse   = new Categoria("Deep House");
+    static Categoria musica   = new Categoria("MUSICA");
+    static Categoria rock   = new Categoria("ROCK");
+    static Categoria techno = new Categoria("TECHNO");
+    static Categoria pop    = new Categoria("POP");
+    static Categoria metal  = new Categoria("METAL");
+    static Categoria folk   = new Categoria("FOLK");
 
     // ── Canciones globales para reutilizar en submenús ───────────────────────
     static Cancion c1 = new Cancion(1, "Bohemian Rhapsody",      "Queen",          rock,   354);
@@ -66,13 +64,6 @@ public class Main {
     static Servidor svNY = new Servidor("NY", "Nueva York");
     static Servidor svMD = new Servidor("MD", "Madrid");
     static Servidor svSP = new Servidor("SP", "São Paulo");
-
-//    static Usuario u1 = new Usuario("Gabriel", "gaby@mail.com",   Usuario.TipoCuenta.PREMIUM);
-//    static Usuario u2 = new Usuario("Lucas",   "lucas@mail.com",  Usuario.TipoCuenta.GRATUITO);
-//    static Usuario u3 = new Usuario("Toto",    "tobias@mail.com", Usuario.TipoCuenta.GRATUITO);
-//    static Usuario u4 = new Usuario("Nestor",  "nestor@mail.com", Usuario.TipoCuenta.PREMIUM);
-//    static Usuario u5 = new Usuario("Brisa",   "brisa@mail.com",  Usuario.TipoCuenta.PREMIUM);
-
 
 
     // ── Datos de prueba ───────────────────────────────────────────────────────
@@ -101,15 +92,12 @@ public class Main {
         catalogoHistorico.insertar(c4);
         catalogoHistorico.insertar(c5);
 
-        // ArbolGenerico: jerarquía de géneros musicales
-        arbolGeneros.agregarHijo(null,     musica);
+         //ArbolGenerico: jerarquía de géneros musicales
+        arbolGeneros.agregarHijo(null,     rock);
         arbolGeneros.agregarHijo(musica, rock);
         arbolGeneros.agregarHijo(musica, pop);
         arbolGeneros.agregarHijo(musica, techno);
-        arbolGeneros.agregarHijo(rock,   nacional);
-        arbolGeneros.agregarHijo(rock, internacional);
-        arbolGeneros.agregarHijo(techno, house);
-        arbolGeneros.agregarHijo(house, deepHouse );
+        arbolGeneros.agregarHijo(musica, folk);
 
         // Pila: pantalla inicial de navegación
         pilaNavegacion.push("INICIO");
@@ -222,6 +210,7 @@ public class Main {
 
         switch (leerInt()) {
             case 1 -> {
+                mostrarListas(listaGlobalCanciones);
                 System.out.print("  ID de canción a buscar: ");
                 int idBusqueda = leerInt();
                 // Creamos una canción "fantasma" solo con el ID para que compareTo funcione
@@ -234,11 +223,33 @@ public class Main {
                 System.out.print("  ID: ");
                 int id = leerInt();
                 scanner.nextLine();
+
                 System.out.print("  Título: ");
                 String titulo = scanner.nextLine();
+
                 System.out.print("  Artista: ");
                 String artista = scanner.nextLine();
-                catalogoHistorico.insertar(new Cancion(id, titulo, artista, rock, 0));
+
+                mostrarListas(listaGlobalCategoria);
+                System.out.print("Categoria: ");
+                String categoria = scanner.nextLine().toUpperCase();
+
+                Categoria categoriaEncontrada = null;
+
+                for (Categoria categoriaAbuscar : listaGlobalCategoria){
+                    if (categoriaAbuscar.getNombre().toUpperCase().equals(categoria)){
+                        categoriaEncontrada = categoriaAbuscar;
+                    }
+                }
+                if (categoriaEncontrada == null) {
+                    System.out.println("No se encontro la categoria");
+                    return;
+                }
+
+                Cancion nueva = new Cancion(id, titulo, artista, categoriaEncontrada, 0);
+                catalogoHistorico.insertar(nueva);
+                listaGlobalCanciones.add(nueva);
+
                 System.out.println("  ✅ Canción insertada.");
             }
             case 3 -> {
@@ -259,9 +270,7 @@ public class Main {
 
         switch (leerInt()) {
             case 1 -> {
-                for (Usuario usuario : listaGlobalUsuarios){
-                    System.out.println(usuario);
-                }
+                mostrarListas(listaGlobalUsuarios);
 
                 System.out.print("  ID del usuario a conectar: ");
                 int id = leerInt();
@@ -335,6 +344,7 @@ public class Main {
         switch (leerInt()) {
             case 1 -> {
                 scanner.nextLine(); // Limpiar buffer
+                mostrarListas(listaGlobalServidores);
                 System.out.print("  Ingrese ID del Servidor (ej: PT): ");
                 String id = scanner.nextLine().toUpperCase();
                 System.out.print("  Ingrese Nombre de la Ciudad: ");
@@ -346,6 +356,7 @@ public class Main {
             }
             case 2 -> {
                 scanner.nextLine(); // Limpiar buffer
+                mostrarListas(listaGlobalServidores);
                 System.out.print("  Ingrese el ID del Servidor a buscar: ");
                 String idBusqueda = scanner.nextLine().toUpperCase();
 
@@ -359,6 +370,7 @@ public class Main {
             }
             case 3 -> {
                 scanner.nextLine(); // Limpiar buffer
+                mostrarListas(listaGlobalServidores);
                 System.out.print("  Ingrese el ID del Servidor a eliminar: ");
                 String idEliminar = scanner.nextLine().toUpperCase();
 
@@ -394,16 +406,28 @@ public class Main {
         switch (leerInt()) {
             case 1 -> {
                 scanner.nextLine();
+                mostrarListas(listaGlobalCategoria);
                 System.out.print("  Género padre (ej: Rock): ");
-                String padre = scanner.nextLine();
+                String padre = scanner.nextLine().toUpperCase();
+                Categoria categoriaEncontrada = null;
+
+                for (Categoria categoriaAbuscar : listaGlobalCategoria){
+                    if (categoriaAbuscar.getNombre().toUpperCase().equals(padre)){
+                        categoriaEncontrada = categoriaAbuscar;
+                    }
+                }
+
+                if (categoriaEncontrada == null) {
+                    System.out.println("No se encontro la categoria");
+                    return;
+                }
+
                 System.out.print("  Nuevo subgénero: ");
                 String hijo = scanner.nextLine();
 
-
-                Categoria categoriaPadre = new Categoria(padre);
-                Categoria categoriaHijo = new Categoria(hijo);
-
-                arbolGeneros.agregarHijo(categoriaPadre, categoriaHijo);
+                Categoria categoriaHijo = new Categoria(hijo.toUpperCase());
+                listaGlobalCategoria.add(categoriaHijo);
+                arbolGeneros.agregarHijo(categoriaEncontrada, categoriaHijo);
 
                 System.out.println("  ✅ '" + hijo + "' agregado bajo '" + padre + "'.");
             }
@@ -460,14 +484,13 @@ public class Main {
 
         switch (leerInt()) {
             case 1 -> {
-                System.out.println("  Seleccioná el servidor origen:");
-                System.out.println("    1. Buenos Aires (BA)");
-                System.out.println("    2. México (MX)");
-                System.out.println("    3. Nueva York (NY)");
-                System.out.println("    4. Madrid (MD)");
-                System.out.println("    5. São Paulo (SP)");
-                System.out.print("  Opción: ");
 
+                System.out.println("  Seleccioná el servidor origen:");
+                for (int i = 0; i < listaGlobalServidores.size(); i++) {
+                    System.out.println(i + 1 + " - " + listaGlobalServidores.get(i).getCiudad());
+                }
+
+                System.out.print("  Opción: ");
                 String id;
                 switch (leerInt()) {
                     case 1 -> id = "BA";
@@ -805,6 +828,7 @@ public class Main {
         soporte.arreglarProblema();
 
         // PASO 2 — Diccionario: verificar qué plan tiene el afectado
+        mostrarListas(listaGlobalUsuarios);
         System.out.print("  ID del usuario que reportó el problema: ");
         int idUsuario = leerInt();
         if (diccionarioUsuarios.contains(idUsuario)) {
@@ -816,6 +840,7 @@ public class Main {
         }
 
         // PASO 3 — ABB: verificar el servidor asignado al problema
+        mostrarListas(listaGlobalServidores);
         System.out.print("  [ABB] Ingrese ID del servidor que falló (ej. MX): ");
         String idSv = scanner.next().toUpperCase();
         Servidor svEncontrado = catalogoServidores.buscar(new Servidor(idSv, ""));
@@ -850,6 +875,7 @@ public class Main {
         }
 
         // PASO 3 — AVL: verificar sesión
+        mostrarListas(listaGlobalUsuarios);
         System.out.print("  [AVL] ID de usuario operando la app: ");
         int idUsuario = leerInt();
         Usuario fake = new Usuario(idUsuario, "", "", Usuario.TipoCuenta.GRATUITO);
@@ -923,6 +949,24 @@ public class Main {
         listaGlobalCanciones.add(c3);
         listaGlobalCanciones.add(c4);
         listaGlobalCanciones.add(c5);
+
+        listaGlobalCategoria.add(musica);
+        listaGlobalCategoria.add(rock);
+        listaGlobalCategoria.add(techno);
+        listaGlobalCategoria.add(pop);
+        listaGlobalCategoria.add(metal);
+        listaGlobalCategoria.add(folk);
+
+        listaGlobalServidores.add(svBA);
+        listaGlobalServidores.add(svMD);
+        listaGlobalServidores.add(svNY);
+        listaGlobalServidores.add(svSP);
+        listaGlobalServidores.add(svMX);
+    }
+    public static void mostrarListas(ArrayList lista){
+        for (Object objeto : lista){
+            System.out.println(objeto);
+        }
     }
 
 }

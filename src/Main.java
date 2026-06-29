@@ -73,7 +73,7 @@ public class Main {
         listaGlobalCategoria.add(rock);
         listaGlobalCategoria.add(techno);
         listaGlobalCategoria.add(pop);
-        listaGlobalCategoria.add(metal);
+        //listaGlobalCategoria.add(metal);
         listaGlobalCategoria.add(folk);
 
         listaGlobalServidores.add(svBA);
@@ -130,7 +130,6 @@ public class Main {
         arbolGeneros.agregarHijo(musica, pop);
         arbolGeneros.agregarHijo(musica, techno);
         arbolGeneros.agregarHijo(musica, folk);
-        arbolGeneros.agregarHijo(musica, metal);
 
 
         // Pila y Cola
@@ -1374,97 +1373,173 @@ public class Main {
     }
 
     // ═════════════════════════════════════════════════════════════════════════
+    // ═════════════════════════════════════════════════════════════════════════
     // CONSULTAS COMPLEJAS
     // ═════════════════════════════════════════════════════════════════════════
 
+    /**
+     * C1: Sesion activa → plan → ruta optima al servidor mas cercano.
+     * TDAs: AVL + Diccionario + Grafo
+     *
+     * Flujo:
+     *  1. AVL  — verificar que el usuario tenga sesion activa (O log n)
+     *  2. Dic  — consultar su plan PREMIUM/GRATUITO en O(1)
+     *  3. Grafo — BFS desde BA para recorrer la red CDN y vecinoMenorPeso
+     *             para asignarle el servidor con menor latencia
+     *
+     * Escenario real: cuando un usuario hace play, el sistema verifica
+     * que este logueado, consulta su plan para aplicar calidad de audio,
+     * y le asigna el servidor mas cercano para minimizar el buffering.
+     */
     static void consultaC1() {
         System.out.println("\n╔══════════════════════════════════════════╗");
-        System.out.println("║  C1: Ruta optima de servidor             ║");
+        System.out.println("║  C1: Sesion activa → plan → servidor     ║");
         System.out.println("║  [AVL + Diccionario + Grafo]             ║");
         System.out.println("╚══════════════════════════════════════════╝");
-        System.out.print("  ID de usuario: ");
+        System.out.println("  Escenario: el usuario presiona PLAY.");
+        System.out.println("  El sistema verifica sesion, plan y asigna servidor optimo.");
+
+        mostrarUsuarios();
+        System.out.print("\n  ID de usuario: ");
         int idUsuario = leerInt();
 
-        // PASO 1 — AVL
-        System.out.println("\n  [PASO 1 - AVL] Buscando usuario ID:" + idUsuario + "...");
+        // ── PASO 1 — AVL ──────────────────────────────────────────────────
+        System.out.println("\n  [PASO 1 - AVL]");
+        System.out.println("  Buscando ID:" + idUsuario + " en el arbol de sesiones activas...");
+        System.out.println("  Complejidad: O(log n) garantizado por el balanceo AVL");
         Usuario fake = new Usuario(idUsuario, "", "", Usuario.TipoCuenta.GRATUITO);
-        Usuario encontrado = usuariosActivos.buscar(fake);
-        if (encontrado == null) {
-            System.out.println("  --> No esta activo. Debe iniciar sesion primero (Menu 2).");
+        Usuario activo = usuariosActivos.buscar(fake);
+        if (activo == null) {
+            System.out.println("  --> SESION NO ENCONTRADA. Usuario ID:" + idUsuario + " no esta conectado.");
+            System.out.println("  --> Accion: redirigir al login. No se puede reproducir.");
             return;
         }
-        System.out.println("  --> ACTIVO. O(log n) garantizado por el AVL.");
+        System.out.println("  --> SESION ACTIVA: " + activo);
 
-        // PASO 2 — Diccionario
-        System.out.println("\n  [PASO 2 - Diccionario] Consultando plan del usuario...");
-        if (diccionarioUsuarios.contains(idUsuario)) {
-            int p = diccionarioUsuarios.get(idUsuario);
-            System.out.println("  --> Plan: " + (p == 1 ? "PREMIUM" : "GRATUITO") + ". Obtenido en O(1).");
-        } else {
-            System.out.println("  --> No esta registrado en el Diccionario.");
+        // ── PASO 2 — Diccionario ──────────────────────────────────────────
+        System.out.println("\n  [PASO 2 - Diccionario]");
+        System.out.println("  Consultando plan del usuario en el HashMap... O(1) amortizado");
+        if (!diccionarioUsuarios.contains(idUsuario)) {
+            System.out.println("  --> Usuario no encontrado en el Diccionario.");
             return;
         }
+        int plan = diccionarioUsuarios.get(idUsuario);
+        String planTexto = (plan == 1) ? "PREMIUM (320 kbps, sin anuncios)" : "GRATUITO (128 kbps, con anuncios)";
+        System.out.println("  --> Plan: " + planTexto);
 
-        // PASO 3 — Grafo
-        System.out.println("\n  [PASO 3 - Grafo] Calculando ruta BFS desde Buenos Aires...");
-        List<Servidor> ruta = redCDN.BFS(svBA);
-        System.out.println("  Recorrido BFS:");
-        for (int i = 0; i < ruta.size(); i++) {
-            System.out.println("    " + (i + 1) + ". " + ruta.get(i));
+        // ── PASO 3 — Grafo ────────────────────────────────────────────────
+        System.out.println("\n  [PASO 3 - Grafo]");
+        System.out.println("  Recorriendo red CDN con BFS desde BA para mapear servidores alcanzables...");
+        List<Servidor> redAlcanzable = redCDN.BFS(svBA);
+        System.out.println("  Red alcanzable (orden BFS):");
+        for (int i = 0; i < redAlcanzable.size(); i++) {
+            System.out.println("    " + (i + 1) + ". " + redAlcanzable.get(i));
         }
         Servidor optimo = redCDN.vecinoMenorPeso(svBA);
-        System.out.println("\n  --> Servidor con menor latencia: " + optimo);
+        System.out.println("\n  vecinoMenorPeso(BA) --> servidor con menor latencia: " + optimo);
+        System.out.println("\n  ══ RESULTADO ══════════════════════════════════════");
+        System.out.println("  Usuario : " + activo.getNombre() + " [ID:" + idUsuario + "]");
+        System.out.println("  Plan    : " + planTexto);
+        System.out.println("  Servidor: " + optimo);
+        System.out.println("  Estado  : Reproduccion iniciada.");
     }
 
+    /**
+     * C2: Soporte premium → verificar plan → marcar servidor en mantenimiento.
+     * TDAs: ColaConPrioridad + Diccionario + ABB
+     *
+     * Flujo:
+     *  1. ColaConPrioridad — extrae el ticket de mayor prioridad (PREMIUM primero)
+     *  2. Diccionario      — verifica el plan del usuario que reporto
+     *  3. ABB              — busca y elimina el servidor con fallo del catalogo
+     *                        marcandolo como en mantenimiento
+     *
+     * Escenario real: el area de soporte atiende el ticket mas urgente,
+     * confirma el plan del usuario afectado y da de baja temporalmente
+     * el servidor fallido del catalogo activo.
+     */
     static void consultaC2() throws InterruptedException {
         System.out.println("\n╔══════════════════════════════════════════╗");
-        System.out.println("║  C2: Atender soporte y verificar         ║");
+        System.out.println("║  C2: Ticket → plan → servidor baja       ║");
         System.out.println("║  [ColaConPrioridad + Diccionario + ABB]  ║");
         System.out.println("╚══════════════════════════════════════════╝");
+        System.out.println("  Escenario: un servidor falla. El soporte atiende");
+        System.out.println("  el ticket mas urgente y da de baja al servidor.");
 
-        // PASO 1 — ColaConPrioridad
-        System.out.println("\n  [PASO 1 - ColaConPrioridad] Extrayendo problema de mayor prioridad...");
-        Object proximoProblema = soporte.proxProblema();
-        if (proximoProblema == null) {
-            System.out.println("  --> Cola vacia. Reporta un problema en el Menu 9 primero.");
+        // ── PASO 1 — ColaConPrioridad ─────────────────────────────────────
+        System.out.println("\n  [PASO 1 - ColaConPrioridad]");
+        System.out.println("  Extrayendo ticket de mayor prioridad (PREMIUM antes que GRATUITO)...");
+        Object proximoTicket = soporte.proxProblema();
+        if (proximoTicket == null) {
+            System.out.println("  --> Cola de soporte vacia.");
+            System.out.println("  --> Reporta un problema primero desde el Menu 9.");
             return;
         }
-        System.out.println("  --> Resolviendo: " + proximoProblema);
+        System.out.println("  peek() --> proximo ticket: " + proximoTicket);
+        System.out.println("  extractMax() --> atendiendo...");
         soporte.arreglarProblema();
 
-        // PASO 2 — Diccionario
-        System.out.println("\n  [PASO 2 - Diccionario] Verificando plan del usuario afectado...");
+        // ── PASO 2 — Diccionario ──────────────────────────────────────────
+        System.out.println("\n  [PASO 2 - Diccionario]");
         mostrarUsuarios();
-        System.out.print("  ID del usuario que reporto: ");
+        System.out.print("  ID del usuario que reporto el problema: ");
         int idUsuario = leerInt();
+        System.out.println("  get(" + idUsuario + ") --> buscando en O(1)...");
         if (diccionarioUsuarios.contains(idUsuario)) {
             int p = diccionarioUsuarios.get(idUsuario);
-            System.out.println("  --> Usuario " + idUsuario + " = " + (p == 1 ? "PREMIUM (fue atendido primero)" : "GRATUITO (espero en cola)"));
+            String nivel = (p == 1) ? "PREMIUM — fue atendido con maxima prioridad" : "GRATUITO — espero detras de los PREMIUM";
+            System.out.println("  --> Usuario " + idUsuario + " = " + nivel);
         } else {
             System.out.println("  --> Usuario no encontrado en el Diccionario.");
         }
 
-        // PASO 3 — ABB
-        System.out.println("\n  [PASO 3 - ABB] Verificando servidor que reporto el fallo...");
+        // ── PASO 3 — ABB ─────────────────────────────────────────────────
+        System.out.println("\n  [PASO 3 - ABB]");
+        System.out.println("  Estado actual del catalogo de servidores:");
+        mostrarABBVisual();
         mostrarServidores();
-        System.out.print("  ID del servidor (ej: MX): ");
+        System.out.print("  ID del servidor que reporto el fallo (ej: MX): ");
         String idSv = scanner.next().toUpperCase();
-        Servidor svEncontrado = catalogoServidores.buscar(new Servidor(idSv, ""));
-        if (svEncontrado != null) {
-            System.out.println("  --> " + svEncontrado + " verificado en el catalogo. Listo para mantenimiento.");
+        System.out.println("  buscar(" + idSv + ") en el ABB... O(log n)");
+        Servidor svFallido = catalogoServidores.buscar(new Servidor(idSv, ""));
+        if (svFallido != null) {
+            System.out.println("  --> ENCONTRADO: " + svFallido);
+            System.out.println("  eliminar(" + idSv + ") --> dando de baja del catalogo activo...");
+            catalogoServidores.eliminar(new Servidor(idSv, ""));
+            listaGlobalServidores.removeIf(s -> s.getId().equals(idSv));
+            System.out.println("  --> Servidor " + idSv + " removido. En mantenimiento.");
+            System.out.println("\n  Catalogo actualizado:");
+            mostrarABBVisual();
         } else {
-            System.out.println("  --> Servidor " + idSv + " no esta en el catalogo ABB.");
+            System.out.println("  --> Servidor '" + idSv + "' no encontrado en el catalogo ABB.");
         }
     }
 
+    /**
+     * C3: Deshacer reproduccion → buscar cancion → registrar historial.
+     * TDAs: Pila + ArbolB + ArbolGenerico
+     *
+     * Flujo:
+     *  1. Pila         — pop para obtener la ultima pantalla visitada
+     *  2. ArbolB       — si era una cancion, buscarla en el catalogo historico
+     *  3. ArbolGenerico — verificar que el genero de esa cancion existe
+     *                     en la jerarquia de categorias
+     *
+     * Escenario real: el usuario presiona "atras" en la app. El sistema
+     * deshace la navegacion, verifica la cancion en el catalogo y
+     * confirma que su genero esta registrado en la jerarquia musical.
+     */
     static void consultaC3() {
         System.out.println("\n╔══════════════════════════════════════════╗");
-        System.out.println("║  C3: Deshacer navegacion                 ║");
-        System.out.println("║  [Pila + ArbolB + AVL]                   ║");
+        System.out.println("║  C3: Atras → cancion → valida genero     ║");
+        System.out.println("║  [Pila + ArbolB + ArbolGenerico]         ║");
         System.out.println("╚══════════════════════════════════════════╝");
+        System.out.println("  Escenario: usuario presiona 'atras'.");
+        System.out.println("  El sistema deshace la navegacion y valida el contexto.");
 
-        // PASO 1 — Pila
-        System.out.println("\n  [PASO 1 - Pila] Estado actual del historial:");
+        // ── PASO 1 — Pila ─────────────────────────────────────────────────
+        System.out.println("\n  [PASO 1 - Pila]");
+        System.out.println("  Estado actual del historial de navegacion:");
         mostrarPilaVisual();
         if (pilaNavegacion.isEmpty()) {
             System.out.println("  --> Pila vacia. No hay navegacion para deshacer.");
@@ -1474,64 +1549,128 @@ public class Main {
         System.out.println("  pop() --> saliste de: '" + pantallaAnterior + "'");
         System.out.println("  Ahora en: " + (pilaNavegacion.isEmpty() ? "INICIO" : pilaNavegacion.peek()));
 
-        // PASO 2 — ArbolB
-        System.out.println("\n  [PASO 2 - ArbolB] Verificando cancion en el catalogo...");
+        // ── PASO 2 — ArbolB ───────────────────────────────────────────────
+        System.out.println("\n  [PASO 2 - ArbolB]");
+        Cancion cancionEncontrada = null;
         if (pantallaAnterior.startsWith("CANCION:")) {
             int idCancion = Integer.parseInt(pantallaAnterior.split(":")[1]);
-            boolean encontrada = catalogoHistorico.buscar(new Cancion(idCancion, "", "", rock, 0));
-            System.out.println("  Buscando ID:" + idCancion + " en el Arbol B...");
-            System.out.println("  --> " + (encontrada ? "ENCONTRADA en el catalogo." : "NO encontrada."));
+            System.out.println("  buscar(ID:" + idCancion + ") en el catalogo historico... O(log n)");
+            boolean existe = catalogoHistorico.buscar(new Cancion(idCancion, "", "", rock, 0));
+            if (existe) {
+                for (Cancion c : listaGlobalCanciones) {
+                    if (c.getId() == idCancion) { cancionEncontrada = c; break; }
+                }
+                System.out.println("  --> ENCONTRADA: " + cancionEncontrada);
+            } else {
+                System.out.println("  --> Cancion ID:" + idCancion + " no encontrada en el Arbol B.");
+            }
         } else {
-            System.out.println("  La pantalla '" + pantallaAnterior + "' no es una cancion, no aplica busqueda en ArbolB.");
+            System.out.println("  La pantalla '" + pantallaAnterior + "' no corresponde a una cancion.");
+            System.out.println("  --> No aplica busqueda en el Arbol B.");
         }
 
-        // PASO 3 — AVL
-        System.out.println("\n  [PASO 3 - AVL] Verificando sesion del usuario...");
-        mostrarUsuarios();
-        System.out.print("  ID del usuario que esta usando la app: ");
-        int idUsuario = leerInt();
-        Usuario fake = new Usuario(idUsuario, "", "", Usuario.TipoCuenta.GRATUITO);
-        Usuario usuarioEnSesion = usuariosActivos.buscar(fake);
-        if (usuarioEnSesion != null) {
-            System.out.println("  --> La sesion del usuario ID:" + idUsuario + " sigue activa en el AVL.");
+        // ── PASO 3 — ArbolGenerico ────────────────────────────────────────
+        System.out.println("\n  [PASO 3 - ArbolGenerico]");
+        if (cancionEncontrada != null) {
+            Categoria generoCancion = cancionEncontrada.getCategoria();
+            System.out.println("  Verificando que el genero '" + generoCancion + "' existe en la jerarquia...");
+            System.out.println("  existeCategoria() recorre el arbol en O(n)");
+            boolean generoRegistrado = arbolGeneros.existeCategoria(generoCancion);
+            System.out.println("  --> Genero '" + generoCancion + "': " +
+                    (generoRegistrado ? "VALIDADO en la jerarquia de generos." : "NO encontrado en la jerarquia."));
+            if (generoRegistrado) {
+                System.out.println("\n  Jerarquia actual para contexto:");
+                mostrarArbolGenericoVisual();
+            }
         } else {
-            System.out.println("  --> La sesion de ID:" + idUsuario + " no esta activa.");
+            System.out.println("  Sin cancion previa, se muestra la jerarquia de generos disponibles:");
+            mostrarArbolGenericoVisual();
         }
+
+        System.out.println("  ══ RESULTADO ══════════════════════════════════════");
+        System.out.println("  Navegacion deshecha: '" + pantallaAnterior + "'");
+        System.out.println("  Pantalla actual    : " + (pilaNavegacion.isEmpty() ? "INICIO" : pilaNavegacion.peek()));
     }
 
+    /**
+     * C4: Seleccionar genero → encolar canciones → conectar usuario.
+     * TDAs: ArbolGenerico + Cola + AVL
+     *
+     * Flujo:
+     *  1. ArbolGenerico — recorre la jerarquia y el usuario elige un genero
+     *  2. Cola          — encola todas las canciones de ese genero en orden FIFO
+     *  3. AVL           — verifica que el usuario que quiere escuchar este activo
+     *
+     * Escenario real: el usuario navega por generos, elige uno y
+     * el sistema carga todas las canciones de ese genero en su cola
+     * de reproduccion, verificando que tenga sesion activa.
+     */
     static void consultaC4() {
         System.out.println("\n╔══════════════════════════════════════════╗");
-        System.out.println("║  C4: Explorar genero y encolar           ║");
-        System.out.println("║  [ArbolGenerico + ArbolB + Cola]         ║");
+        System.out.println("║  C4: Genero → encolar → verificar sesion ║");
+        System.out.println("║  [ArbolGenerico + Cola + AVL]            ║");
         System.out.println("╚══════════════════════════════════════════╝");
+        System.out.println("  Escenario: usuario navega por generos y");
+        System.out.println("  elige uno para escuchar todas sus canciones.");
 
-        // PASO 1 — ArbolGenerico
-        System.out.println("\n  [PASO 1 - ArbolGenerico] Jerarquia de generos disponibles:");
+        // ── PASO 1 — ArbolGenerico ────────────────────────────────────────
+        System.out.println("\n  [PASO 1 - ArbolGenerico]");
+        System.out.println("  Jerarquia de generos disponibles (recorridoAmplitud — BFS):");
         mostrarArbolGenericoVisual();
         System.out.print("  Recorrido BFS: ");
         arbolGeneros.recorridoAmplitud();
 
-        // PASO 2 — ArbolB
-        System.out.println("\n  [PASO 2 - ArbolB] Buscar cancion en el catalogo:");
-        mostrarCanciones();
-        System.out.print("\n  ID de cancion a encolar: ");
-        int id = leerInt();
-        boolean encontrada = catalogoHistorico.buscar(new Cancion(id, "", "", rock, 0));
-        if (!encontrada) {
-            System.out.println("  --> ID:" + id + " no encontrado en el Arbol B.");
+        scanner.nextLine();
+        mostrarCategorias();
+        System.out.print("  Genero a reproducir (nombre exacto): ");
+        String nombreGenero = scanner.nextLine().toUpperCase();
+        Categoria generoElegido = new Categoria(nombreGenero);
+        System.out.println("  existeCategoria('" + nombreGenero + "')... O(n)");
+        if (!arbolGeneros.existeCategoria(generoElegido)) {
+            System.out.println("  --> Genero '" + nombreGenero + "' no existe en la jerarquia.");
             return;
         }
-        System.out.println("  --> Cancion ID:" + id + " confirmada en el catalogo.");
+        System.out.println("  --> Genero VALIDADO en la jerarquia.");
 
-        // PASO 3 — Cola
-        System.out.println("\n  [PASO 3 - Cola] Encolando la cancion...");
+        // ── PASO 2 — Cola ─────────────────────────────────────────────────
+        System.out.println("\n  [PASO 2 - Cola]");
+        System.out.println("  Buscando canciones del genero '" + nombreGenero + "' y encolando...");
+        int encoladas = 0;
         for (Cancion c : listaGlobalCanciones) {
-            if (c.getId() == id) {
+            if (c.getCategoria().equals(generoElegido)) {
                 colaReproduccion.enqueue(c);
                 System.out.println("  enqueue('" + c.getTitulo() + "') --> agregada al FIN de la cola.");
-                System.out.println("  Proxima en reproducir: " + colaReproduccion.front());
-                break;
+                pilaNavegacion.push("CANCION:" + c.getId());
+                encoladas++;
             }
+        }
+        if (encoladas == 0) {
+            System.out.println("  --> No hay canciones registradas bajo el genero '" + nombreGenero + "'.");
+            System.out.println("  --> Agrega canciones desde el Menu 1 con esa categoria.");
+        } else {
+            System.out.println("  --> " + encoladas + " cancion(es) encoladas.");
+            System.out.println("  Proxima en reproducir: " + colaReproduccion.front());
+        }
+
+        // ── PASO 3 — AVL ─────────────────────────────────────────────────
+        System.out.println("\n  [PASO 3 - AVL]");
+        System.out.println("  Verificando que el usuario que escucha tenga sesion activa...");
+        mostrarAVLVisual();
+        mostrarUsuarios();
+        System.out.print("  ID del usuario que va a reproducir: ");
+        int idUsuario = leerInt();
+        Usuario fake = new Usuario(idUsuario, "", "", Usuario.TipoCuenta.GRATUITO);
+        Usuario sesionActiva = usuariosActivos.buscar(fake);
+        System.out.println("  buscar(ID:" + idUsuario + ") en AVL... O(log n)");
+
+        System.out.println("\n  ══ RESULTADO ══════════════════════════════════════");
+        System.out.println("  Genero elegido : " + nombreGenero);
+        System.out.println("  Canciones cola : " + encoladas);
+        System.out.println("  Proxima cancion: " + (colaReproduccion.isEmpty() ? "(cola vacia)" : colaReproduccion.front()));
+        if (sesionActiva != null) {
+            System.out.println("  Usuario activo : " + sesionActiva.getNombre() + " [ID:" + idUsuario + "] — Reproduccion autorizada.");
+        } else {
+            System.out.println("  Usuario ID:" + idUsuario + " NO tiene sesion activa — debe iniciar sesion (Menu 2).");
         }
     }
 

@@ -1,12 +1,5 @@
 import Clases.*;
-import TDA.Diccionario;
-import TDA.ArbolB;
-import TDA.ArbolGenerico;
-import TDA.Cola;
-import TDA.Pila;
-import TDA.Abb;
-import TDA.Avl;
-import TDA.Grafo;
+import TDA.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +9,7 @@ import Clases.Categoria;
 import javax.swing.*;
 
 /**
- * Main — Sistema de Streaming de Audio (Espotifai)
+ * Main — Sistema de Streaming de Audio (Espotifai 🎵)
  *
  * P1 La cabra        → Arquitectura, Diccionario, Main, consultas complejas
  * P2 Lucas-Chan      → ABB + AVL
@@ -30,8 +23,8 @@ public class Main {
     static Diccionario<Integer, Integer> diccionarioUsuarios = new Diccionario<>();
 
     // ── TDA P2: descomentar cuando Lucas-Chan entregue ────────────────────────
-    // static Abb<CreadorCont> catalogoCreadores = new Abb<>();
-    // static Avl<Usuario>     usuariosActivos   = new Avl<>();
+    static Abb<Servidor> catalogoServidores = new Abb<>();
+    static Avl<Usuario> usuariosActivos = new Avl<>();
 
     // ── TDA P3: ArbolB y ArbolGenerico ────────────────────────────────────────
     static ArbolB<Cancion>       catalogoHistorico = new ArbolB<>();
@@ -66,6 +59,13 @@ public class Main {
     static Cancion c3 = new Cancion(3, "Strobe",                  "deadmau5",       techno, 601);
     static Cancion c4 = new Cancion(4, "La Llorona",              "Chavela Vargas", folk,   218);
     static Cancion c5 = new Cancion(5, "Smells Like Teen Spirit", "Nirvana",        metal,  301);
+
+    static Servidor svBA = new Servidor("BA", "Buenos Aires");
+    static Servidor svMX = new Servidor("MX", "México");
+    static Servidor svNY = new Servidor("NY", "Nueva York");
+    static Servidor svMD = new Servidor("MD", "Madrid");
+    static Servidor svSP = new Servidor("SP", "São Paulo");
+
 
     // ── Datos de prueba ───────────────────────────────────────────────────────
     static void cargarDatosPrueba() {
@@ -111,9 +111,12 @@ public class Main {
         colaReproduccion.enqueue(c2);
         colaReproduccion.enqueue(c3);
 
-        // Creadores de contenido — pendiente P2
-        // CreadorCont canal1 = new CreadorCont(1, "rockclasico",  "Rock de los 70s-90s");
-        // catalogoCreadores.insertar(canal1);
+        // ABB: Servidores - P2
+        catalogoServidores.insertar(svBA);
+        catalogoServidores.insertar(svMX);
+        catalogoServidores.insertar(svNY);
+        catalogoServidores.insertar(svMD);
+        catalogoServidores.insertar(svSP);
 
         // Usuarios activos — pendiente P2
         // usuariosActivos.insertar(u1); usuariosActivos.insertar(u4); usuariosActivos.insertar(u5);
@@ -150,10 +153,10 @@ public class Main {
             System.out.println("\n╔══════════════════════════════════════════╗");
             System.out.println("║   SISTEMA DE STREAMING DE AUDIO          ║");
             System.out.println("╠══════════════════════════════════════════╣");
-            System.out.println("║  1.  Catálogo canciones  (Árbol B)       ║");
+            System.out.println("║  1.  Catálogo canciones  (Árbol B)        ║");
             System.out.println("║  2.  Usuarios activos    (AVL) ⏳         ║");
-            System.out.println("║  3.  Catálogo creadores  (ABB) ⏳         ║");
-            System.out.println("║  4.  Géneros musicales   (Árbol n-ario)  ║");
+            System.out.println("║  3.  Catálogo servidores (ABB) ✅         ║");
+            System.out.println("║  4.  Géneros musicales   (Árbol n-ario)   ║");
             System.out.println("║  5.  Red CDN             (Grafo) ✅       ║");
             System.out.println("║  6.  Historial           (Pila)           ║");
             System.out.println("║  7.  Cola reproducción   (Cola)           ║");
@@ -240,8 +243,61 @@ public class Main {
 
     // ── 3. ABB ────────────────────────────────────────────────────────────────
     static void menuABB() {
-        System.out.println("\n── Catálogo de Creadores (ABB) ── [⏳ Lucas-Chan pendiente]");
-        System.out.println("  Falta: insertar/buscar/eliminar/inorden.");
+        System.out.println("\n── Catálogo de Servidores Activos (ABB) ──");
+        System.out.println("  1. Registrar / Insertar nuevo Servidor");
+        System.out.println("  2. Buscar Servidor por ID");
+        System.out.println("  3. Dar de baja / Eliminar Servidor");
+        System.out.println("  4. Mostrar todos los Servidores (Inorden alfabético)");
+        System.out.print("  Opción: ");
+
+        switch (leerInt()) {
+            case 1 -> {
+                scanner.nextLine(); // Limpiar buffer
+                System.out.print("  Ingrese ID del Servidor (ej: PT): ");
+                String id = scanner.nextLine().toUpperCase();
+                System.out.print("  Ingrese Nombre de la Ciudad: ");
+                String ciudad = scanner.nextLine();
+
+                Servidor nuevoSv = new Servidor(id, ciudad);
+                catalogoServidores.insertar(nuevoSv);
+                System.out.println("  ✅ Servidor " + id + " insertado correctamente en el ABB.");
+            }
+            case 2 -> {
+                scanner.nextLine(); // Limpiar buffer
+                System.out.print("  Ingrese el ID del Servidor a buscar: ");
+                String idBusqueda = scanner.nextLine().toUpperCase();
+
+                // Creamos un objeto fantasma con el ID para la comparación
+                Servidor buscado = catalogoServidores.buscar(new Servidor(idBusqueda, ""));
+                if (buscado != null) {
+                    System.out.println("  ✅ Servidor encontrado: " + buscado.getCiudad() + " (" + buscado.getId() + ")");
+                } else {
+                    System.out.println("  ❌ El Servidor con ID " + idBusqueda + " no existe en el catálogo.");
+                }
+            }
+            case 3 -> {
+                scanner.nextLine(); // Limpiar buffer
+                System.out.print("  Ingrese el ID del Servidor a eliminar: ");
+                String idEliminar = scanner.nextLine().toUpperCase();
+
+                Servidor objetivo = new Servidor(idEliminar, "");
+                if (catalogoServidores.buscar(objetivo) != null) {
+                    catalogoServidores.eliminar(objetivo);
+                    System.out.println("  ✅ Servidor " + idEliminar + " eliminado del ABB.");
+                } else {
+                    System.out.println("  ❌ No se encontró el Servidor con ID " + idEliminar + ".");
+                }
+            }
+            case 4 -> {
+                System.out.println("\n  --- SERVIDORES REGISTRADOS (Inorden) ---");
+                if (catalogoServidores.esVacio()) {
+                    System.out.println("  (El árbol está vacío)");
+                } else {
+                    catalogoServidores.inorden();
+                }
+            }
+            default -> System.out.println("  ⚠ Opción inválida.");
+        }
     }
 
     // ── 4. ÁRBOL N-ARIO ───────────────────────────────────────────────────────
@@ -406,7 +462,7 @@ public class Main {
     static void menuPila() {
         System.out.println("\n── Historial de Navegación (Pila) ──");
         System.out.println("  Pantalla actual: " + (pilaNavegacion.isEmpty() ? "ninguna" : pilaNavegacion.peek()));
-        System.out.println("  1. Ir a nueva pantalla (push)");
+        System.out.println("  1. Ir a nueva cancion (push)");
         System.out.println("  2. Volver atrás        (pop)");
         System.out.println("  3. Ver pantalla actual (peek)");
         System.out.print("  Opción: ");
@@ -464,6 +520,7 @@ public class Main {
                     System.out.println("  ⚠ La cola está vacía.");
                 } else {
                     Cancion c = colaReproduccion.dequeue();
+                    pilaNavegacion.push(c.getTitulo());
                     c.reproducir();
                     // Guardamos la canción reproducida en el historial de navegación
                     pilaNavegacion.push("CANCION:" + c.getId());

@@ -13,8 +13,6 @@ import Interfaces.iAbb;
 public class Abb<T extends Comparable<T>> implements iAbb<T>{
     private NodoABB<T> raiz;  // raíz del árbol, null si está vacío
 
-
-
     private NodoABB<T> insertar (NodoABB<T> nodo, T dato) {
         if(nodo == null) return new NodoABB<>(dato); // encontré el lugar vacío
         int cmp = dato.compareTo(nodo.dato);

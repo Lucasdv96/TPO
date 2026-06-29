@@ -3,7 +3,6 @@ package Interfaces;
 /**
 El diccionario se usa para ver si el usuario tiene un plan gratuito o  premiun
  y asi determinar su prioridad
- la complejidad es de.... no me acuerdo
  1 premium 0 gratuito
  premium tiene mas prioridad.
  */

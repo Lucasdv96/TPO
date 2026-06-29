@@ -15,7 +15,7 @@ package Clases;
  */
 
 
-// Este flujo y clase "categoria" la planteo claudio, pero banco, no es tanto mas y esta bueno, de ultima despues vemos
+
 public class Categoria {
 
     private String nombre;

@@ -24,7 +24,7 @@ public class Playlist {
         canciones.add(c);
     }
 
-    //aca me cogio el cerebro el profe, me agarro disociando aca me ayudo claudio
+
     public void eliminarCancion(int idCancion) {
         canciones.removeIf(c -> c.getId() == idCancion);
     }

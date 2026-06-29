@@ -2,12 +2,13 @@ package Interfaces;
 
 /**
  * Interfaz para la Pila (LIFO).
- * Uso en el sistema: historial de navegación del usuario dentro de la app.
+ * Uso en el sistema: historial de navegación del usuario con respecto a cada cancion visitada. Estas se apilan
+ * LIFO (Last in first out)
  * Cada pantalla visitada se apila; "atrás" hace pop.
  */
 public interface iPila<T> {
 
-    //Apila un elemento.s
+    //Apila un elemento
     void push(T dato);
 
     //Desapila y retorna el elemento del tope.

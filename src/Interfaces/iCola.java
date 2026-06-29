@@ -2,7 +2,6 @@ package Interfaces;
 
 /**
  * Interfaz para la Cola (FIFO).
- * Uso en el sistema: playlist en reproducción actual del usuario.
  * La canción que entra primero es la primera en reproducirse.
  * Complejidad: O(1) para todas las operaciones.
  */

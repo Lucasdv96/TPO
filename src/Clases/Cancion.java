@@ -10,8 +10,8 @@ public class Cancion implements Comparable<Cancion> {
     private String titulo;
     private String artista;
     private Categoria categoria;       // ej: "Rock", "Pop", "Electrónica", "rkt"
-    private int duracionSeg;     // duración en segundos para que el mogolico de tobias no se queje
-    private int reproducciones;  // usado para prioridad en ColaConPrioridad
+    private int duracionSeg;     // duración en segundos
+    private int reproducciones;
 
     public Cancion(int id, String titulo, String artista, Categoria categoria, int duracionSeg) {
         this.id = id;
@@ -26,7 +26,7 @@ public class Cancion implements Comparable<Cancion> {
         this.reproducciones++;
     }
 
-    // Comparable por id — usado en ArbolB y ABB (P2 y P3 arreglense jijiji)
+    // Comparable por id — usado en ArbolB y ABB (P2 y P3 )
     @Override
     public int compareTo(Cancion otra) {
         return Integer.compare(this.id, otra.id);

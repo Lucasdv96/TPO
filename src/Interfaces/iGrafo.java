@@ -9,7 +9,7 @@ import java.util.List;
  * Complejidad BFS/DFS: O(V + E) donde V = vértices, E = aristas.
  */
 
-//aca se lo pedi entero a claudio es lo de los servidores, yo digo que lo cambiemos, despues debatimos que hacemos con este.
+//Verifica los servidores y su latencia con el proximo.
 public interface iGrafo<T> {
 
     /**

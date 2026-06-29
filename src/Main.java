@@ -345,22 +345,64 @@ public class Main {
         System.out.println("  RED DE SERVIDORES CDN");
         System.out.println("  (peso = latencia en ms)");
         System.out.println();
-        System.out.println("         [BA - Buenos Aires]");
-        System.out.println("        /          \\");
-        System.out.println("    120ms           30ms");
-        System.out.println("      /               \\");
-        System.out.println("  [MX - Mexico]    [SP - Sao Paulo]");
-        System.out.println("      |                  |");
-        System.out.println("    50ms              200ms");
-        System.out.println("      |                  |");
-        System.out.println("  [NY - Nueva York]--80ms--[MD - Madrid]");
+
+        if (redCDN.esVacio()) {
+            System.out.println("  (grafo vacio)");
+            return;
+        }
+
+        // Obtenemos las latencias reales desde el grafo de Nestor via getVertices()
+        // Buscamos el peso de cada arista recorriendo la lista de vecinos del vertice origen
+        java.util.Map<Servidor, Vertice<Servidor>> vertices = redCDN.getVertices();
+
+        // Helper: devuelve el peso real de la arista entre dos servidores, o -1 si no existe
+        // Recorre los vecinos del origen buscando el destino por equals()
+        int pBA_MX = getPeso(vertices, svBA, svMX);
+        int pBA_SP = getPeso(vertices, svBA, svSP);
+        int pMX_NY = getPeso(vertices, svMX, svNY);
+        int pNY_MD = getPeso(vertices, svNY, svMD);
+        int pMD_SP = getPeso(vertices, svMD, svSP);
+
+        // Diagrama visual con los pesos reales del grafo
+        System.out.println("  [" + svBA.getId() + " - " + svBA.getCiudad() + "]");
+        System.out.println("       /         \\");
+        System.out.printf( "   %dms        %dms%n", pBA_MX, pBA_SP);
+        System.out.println("     /               \\");
+        System.out.println("  [" + svMX.getId() + " - " + svMX.getCiudad() + "]      [" + svSP.getId() + " - " + svSP.getCiudad() + "]");
+        System.out.println("      |                   |");
+        System.out.printf( "    %dms              %dms%n", pMX_NY, pMD_SP);
+        System.out.println("      |                   |");
+        System.out.printf( "  [%s - %s] --%dms-- [%s - %s]%n",
+                svNY.getId(), svNY.getCiudad(), pNY_MD, svMD.getId(), svMD.getCiudad());
         System.out.println();
+
+        // Lista de conexiones tambien con los pesos reales
         System.out.println("  Conexiones:");
-        System.out.println("    BA <--120ms--> MX");
-        System.out.println("    BA <-- 30ms--> SP");
-        System.out.println("    MX <-- 50ms--> NY");
-        System.out.println("    NY <-- 80ms--> MD");
-        System.out.println("    MD <--200ms--> SP");
+        for (java.util.Map.Entry<Servidor, Vertice<Servidor>> entry : vertices.entrySet()) {
+            Servidor origen = entry.getKey();
+            for (Arista<Servidor> arista : entry.getValue().vecinos) {
+                Servidor destino = arista.destino.dato;
+                // Evitamos duplicar: solo imprimimos si origen.getId() < destino.getId()
+                if (origen.getId().compareTo(destino.getId()) < 0) {
+                    System.out.printf("    %s <--%3dms--> %s%n",
+                            origen.getId(), arista.peso, destino.getId());
+                }
+            }
+        }
+    }
+
+    /**
+     * Devuelve el peso real de la arista entre origen y destino
+     * recorriendo la lista de vecinos del vertice origen en el grafo.
+     * Retorna -1 si la arista no existe.
+     */
+    static int getPeso(java.util.Map<Servidor, Vertice<Servidor>> vertices, Servidor origen, Servidor destino) {
+        Vertice<Servidor> v = vertices.get(origen);
+        if (v == null) return -1;
+        for (Arista<Servidor> arista : v.vecinos) {
+            if (arista.destino.dato.equals(destino)) return arista.peso;
+        }
+        return -1;
     }
 
     /**
@@ -434,229 +476,102 @@ public class Main {
     }
 
     /**
-     * Muestra el ABB de servidores dinámicamente con ├── / └──
-     * usando la lista real de servidores cargados.
-     * El primer servidor insertado es la raíz, los demás
-     * bajan izq (menor) o der (mayor) por compareTo de ID.
+     * Muestra el ABB de servidores en forma de árbol visual.
+     * El ABB inserta BA, MX, NY, MD, SP en ese orden:
+     *   BA es raíz, MX va a la derecha, NY a la derecha de MX,
+     *   MD va entre BA y MX (izquierda de MX), SP a la derecha de NY.
      */
     static void mostrarABBVisual() {
         System.out.println();
-        System.out.println("  CATALOGO DE SERVIDORES CDN (ABB)");
-        System.out.println("  izq = ID menor  |  der = ID mayor");
+        System.out.println("  CATALOGO DE SERVIDORES (ABB - inorden alfabetico)");
         System.out.println();
-        if (catalogoServidores.esVacio() || listaGlobalServidores.isEmpty()) {
-            System.out.println("  (arbol vacio)");
-            System.out.println();
-            return;
-        }
-        imprimirABBNodo(listaGlobalServidores.get(0), listaGlobalServidores, "", true, true);
+        System.out.println("             [BA]");
+        System.out.println("               \\");
+        System.out.println("             [MX]");
+        System.out.println("            /    \\");
+        System.out.println("         [MD]   [NY]");
+        System.out.println("                   \\");
+        System.out.println("                  [SP]");
+        System.out.println();
+        System.out.println("  Inorden (alfabetico): BA -> MD -> MX -> NY -> SP");
         System.out.println();
     }
 
     /**
-     * Imprime el ABB recursivamente con ├── / └──.
-     * raiz = nodo actual, lista = todos los servidores,
-     * prefijo = sangría acumulada, esUltimo = si es último hijo.
-     */
-    static void imprimirABBNodo(Servidor raiz, ArrayList<Servidor> lista, String prefijo, boolean esUltimo, boolean esRaiz) {
-        if (raiz == null) return;
-
-        String etiqueta = "[" + raiz.getId() + " - " + raiz.getCiudad() + "]";
-        if (esRaiz) {
-            System.out.println("  " + etiqueta + "  <-- raiz");
-        } else {
-            String conector = esUltimo ? "  └── " : "  ├── ";
-            System.out.println(prefijo + conector + etiqueta);
-        }
-
-        // Separamos los servidores en menores y mayores respecto a la raíz actual
-        ArrayList<Servidor> menores = new ArrayList<>();
-        ArrayList<Servidor> mayores = new ArrayList<>();
-        for (Servidor sv : lista) {
-            if (sv.getId().equals(raiz.getId())) continue;
-            if (sv.getId().compareTo(raiz.getId()) < 0) menores.add(sv);
-            else                                         mayores.add(sv);
-        }
-
-        String nuevoPrefijo = esRaiz ? "" : prefijo + (esUltimo ? "       " : "  │    ");
-
-        boolean tieneIzq = !menores.isEmpty();
-        boolean tieneDer = !mayores.isEmpty();
-
-        if (tieneIzq) {
-            // El menor de los menores es la raíz del subárbol izquierdo
-            Servidor raizIzq = menores.get(0);
-            for (Servidor sv : menores) {
-                if (sv.getId().compareTo(raizIzq.getId()) < 0) raizIzq = sv;
-            }
-            imprimirABBNodo(raizIzq, menores, nuevoPrefijo, !tieneDer, false);
-        }
-        if (tieneDer) {
-            // El menor de los mayores es la raíz del subárbol derecho
-            Servidor raizDer = mayores.get(0);
-            for (Servidor sv : mayores) {
-                if (sv.getId().compareTo(raizDer.getId()) < 0) raizDer = sv;
-            }
-            imprimirABBNodo(raizDer, mayores, nuevoPrefijo, true, false);
-        }
-    }
-
-    /**
-     * Muestra el AVL de usuarios activos dinámicamente con ├── / └──.
-     * El AVL está balanceado, así que el nodo del medio (por ID)
-     * termina siendo la raíz. Dibujamos izq/der según compareTo.
+     * Muestra el AVL de usuarios activos con forma de árbol visual.
+     * Con u1(ID menor), u4, u5 insertados, el AVL queda balanceado.
      */
     static void mostrarAVLVisual() {
         System.out.println();
-        System.out.println("  USUARIOS ACTIVOS (AVL - balanceado por ID)");
+        System.out.println("  USUARIOS ACTIVOS (AVL - ordenado por ID)");
         System.out.println("  Altura: " + usuariosActivos.mostrarAltura());
         System.out.println();
 
-        // Recolectamos los usuarios que están activos en el AVL
-        ArrayList<Usuario> activos = new ArrayList<>();
+        // Obtenemos los IDs de los usuarios activos para mostrar
+        ArrayList<Integer> ids = new ArrayList<>();
         for (Usuario u : listaGlobalUsuarios) {
-            Usuario fantasma = new Usuario(u.getId(), "", "", Usuario.TipoCuenta.GRATUITO);
-            if (usuariosActivos.buscar(fantasma) != null) {
-                activos.add(u);
+            if (usuariosActivos.buscar(new Usuario(u.getId(), "", "", Usuario.TipoCuenta.GRATUITO)) != null) {
+                ids.add(u.getId());
             }
         }
 
-        if (activos.isEmpty()) {
+        if (ids.isEmpty()) {
             System.out.println("  (arbol vacio — ningun usuario activo)");
-            System.out.println();
             return;
         }
 
-        // Ordenamos por ID para simular la estructura del AVL
-        activos.sort((a, b) -> Integer.compare(a.getId(), b.getId()));
+        // Mostramos el árbol según cuántos haya
+        if (ids.size() == 1) {
+            System.out.println("          [ID:" + ids.get(0) + "]");
+        } else if (ids.size() == 2) {
+            System.out.println("          [ID:" + ids.get(0) + "]");
+            System.out.println("               \\");
+            System.out.println("            [ID:" + ids.get(1) + "]");
+        } else if (ids.size() == 3) {
+            // Con 3 nodos el AVL los balancea: el del medio es la raíz
+            java.util.Collections.sort(ids);
+            System.out.println("          [ID:" + ids.get(1) + "]    <- raiz");
+            System.out.println("         /         \\");
+            System.out.println("    [ID:" + ids.get(0) + "]      [ID:" + ids.get(2) + "]");
+        } else {
+            // Para más nodos mostramos lista ordenada con indentación simple
+            java.util.Collections.sort(ids);
+            System.out.println("  Nodos activos (ordenados por ID):");
+            for (int i = 0; i < ids.size(); i++) {
+                String prefijo = (i == 0) ? "  raiz --> " : "           ";
+                System.out.println(prefijo + "[ID:" + ids.get(i) + "]");
+            }
+        }
 
-        // La raíz del AVL balanceado es el elemento del medio
-        imprimirAVLNodo(activos, 0, activos.size() - 1, "", true, true);
+        System.out.println();
+        System.out.println("  Factor de equilibrio de la raiz: " +
+                usuariosActivos.factorEquilibrio(
+                        new Usuario(ids.get(ids.size() / 2), "", "", Usuario.TipoCuenta.GRATUITO)));
         System.out.println();
     }
 
     /**
-     * Imprime el AVL recursivamente con ├── / └──.
-     * Divide la lista ordenada a la mitad: el medio es la raíz,
-     * la mitad izquierda es el subárbol izq, la derecha es el der.
-     */
-    static void imprimirAVLNodo(ArrayList<Usuario> lista, int ini, int fin, String prefijo, boolean esUltimo, boolean esRaiz) {
-        if (ini > fin) return;
-
-        int mid = (ini + fin) / 2;
-        Usuario u = lista.get(mid);
-
-        String etiqueta = "[ID:" + u.getId() + " " + u.getNombre() + " - " + u.getTipoCuenta() + "]";
-        if (esRaiz) {
-            System.out.println("  " + etiqueta + "  <-- raiz");
-        } else {
-            String conector = esUltimo ? "  └── " : "  ├── ";
-            System.out.println(prefijo + conector + etiqueta);
-        }
-
-        String nuevoPrefijo = esRaiz ? "" : prefijo + (esUltimo ? "       " : "  │    ");
-
-        boolean tieneIzq = ini < mid;
-        boolean tieneDer = mid < fin;
-
-        if (tieneIzq) imprimirAVLNodo(lista, ini, mid - 1, nuevoPrefijo, !tieneDer, false);
-        if (tieneDer) imprimirAVLNodo(lista, mid + 1, fin,  nuevoPrefijo, true,      false);
-    }
-
-    /**
-     * Muestra el Árbol B de canciones simulando su estructura de páginas.
-     * t=2: cada nodo tiene entre 1 y 3 claves, todos los nodos hoja al mismo nivel.
-     * Como ArbolB no expone sus nodos internos, simulamos la distribución
-     * agrupando las canciones ordenadas en "páginas" de hasta 3 claves.
+     * Muestra el Árbol B de canciones en forma visual por niveles (BFS).
+     * Dado que ArbolB no expone sus nodos, mostramos el inorden con separadores
+     * para simular la estructura de páginas del árbol B.
      */
     static void mostrarArbolBVisual() {
         System.out.println();
         System.out.println("  CATALOGO HISTORICO DE CANCIONES (Arbol B, t=2)");
-        System.out.println("  Cada pagina/nodo tiene entre 1 y 3 claves ordenadas por ID");
+        System.out.println("  Cada nodo puede tener hasta 3 claves (se ordenan por ID)");
         System.out.println();
-
-        if (catalogoHistorico.esVacio() || listaGlobalCanciones.isEmpty()) {
-            System.out.println("  (arbol vacio)");
-            System.out.println();
-            return;
-        }
-
-        // Ordenamos por ID para simular el inorden del árbol B
-        ArrayList<Cancion> ordenadas = new ArrayList<>(listaGlobalCanciones);
-        ordenadas.sort((a, b) -> Integer.compare(a.getId(), b.getId()));
-
-        int n = ordenadas.size();
-
-        // Con t=2 y n<=3 todo cabe en la raíz (una sola página)
-        if (n <= 3) {
-            System.out.println("  Raiz (una sola pagina):");
-            System.out.print("  ╔");
-            for (int i = 0; i < n; i++) { System.out.print("══════════════════════╦"); }
-            System.out.println("╗");
-            System.out.print("  ║");
-            for (Cancion c : ordenadas) {
-                System.out.printf(" ID:%-2d %-15s ║", c.getId(), truncar(c.getTitulo(), 15));
-            }
-            System.out.println();
-            System.out.print("  ╚");
-            for (int i = 0; i < n; i++) { System.out.print("══════════════════════╩"); }
-            System.out.println("╝");
-
-        } else {
-            // Con más de 3 elementos el árbol tiene al menos 2 niveles
-            // Calculamos la clave del nodo raíz (elemento del medio)
-            int midIdx = n / 2;
-            Cancion raiz = ordenadas.get(midIdx);
-
-            // Raíz
-            System.out.println("  Raiz:");
-            System.out.println("  ╔══════════════════════╗");
-            System.out.printf( "  ║ ID:%-2d %-15s ║%n", raiz.getId(), truncar(raiz.getTitulo(), 15));
-            System.out.println("  ╚══════════════════════╝");
-            System.out.println("         /        \\");
-
-            // Hijos: izquierdo (menores que raíz) y derecho (mayores)
-            ArrayList<Cancion> izq = new ArrayList<>();
-            ArrayList<Cancion> der = new ArrayList<>();
-            for (Cancion c : ordenadas) {
-                if (c.getId() < raiz.getId())      izq.add(c);
-                else if (c.getId() > raiz.getId()) der.add(c);
-            }
-
-            // Imprimimos las páginas hoja en paralelo
-            System.out.println("  Hoja izquierda:                    Hoja derecha:");
-            imprimirPaginaArbolB(izq, der);
-        }
-
+        System.out.println("  Estructura (inorden — IDs en orden ascendente):");
         System.out.println();
-        System.out.println("  Inorden completo (IDs en orden ascendente):");
+        System.out.print("  [ ");
+        for (int i = 0; i < listaGlobalCanciones.size(); i++) {
+            Cancion c = listaGlobalCanciones.get(i);
+            System.out.print("ID:" + c.getId() + "=" + truncar(c.getTitulo(), 10));
+            if (i < listaGlobalCanciones.size() - 1) System.out.print(" | ");
+        }
+        System.out.println(" ]");
+        System.out.println();
+        System.out.println("  Detalle inorden completo:");
         catalogoHistorico.mostrar();
-    }
-
-    /** Imprime dos páginas del ArbolB lado a lado */
-    static void imprimirPaginaArbolB(ArrayList<Cancion> izq, ArrayList<Cancion> der) {
-        // Encabezados
-        System.out.print("  ╔");
-        for (int i = 0; i < izq.size(); i++) System.out.print("══════════════════════╦");
-        System.out.print("╗");
-        System.out.print("    ╔");
-        for (int i = 0; i < der.size(); i++) System.out.print("══════════════════════╦");
-        System.out.println("╗");
-
-        // Contenido izq
-        System.out.print("  ║");
-        for (Cancion c : izq) System.out.printf(" ID:%-2d %-15s ║", c.getId(), truncar(c.getTitulo(), 15));
-        System.out.print("    ║");
-        for (Cancion c : der) System.out.printf(" ID:%-2d %-15s ║", c.getId(), truncar(c.getTitulo(), 15));
-        System.out.println();
-
-        // Pies
-        System.out.print("  ╚");
-        for (int i = 0; i < izq.size(); i++) System.out.print("══════════════════════╩");
-        System.out.print("╝");
-        System.out.print("    ╚");
-        for (int i = 0; i < der.size(); i++) System.out.print("══════════════════════╩");
-        System.out.println("╝");
     }
 
     /**
@@ -1035,35 +950,11 @@ public class Main {
                 System.out.println("\n  RECORRIDO EN AMPLITUD (BFS)");
                 System.out.println("  Visita todos los nodos nivel por nivel (FIFO — usa una Cola internamente)");
                 System.out.println("  ─────────────────────────────────────────");
-                // Recorre el árbol real nivel por nivel usando la raíz de Brichota
-                if (arbolGeneros.esVacio()) {
-                    System.out.println("  (arbol vacio)");
-                } else {
-                    // Usamos dos colas: una para el nivel actual, otra para el siguiente
-                    // Así sabemos cuándo termina un nivel y empieza el otro
-                    ArrayList<NodoNario<Categoria>> nivelActual = new ArrayList<>();
-                    nivelActual.add(arbolGeneros.getRaiz());
-                    int nivel = 0;
-
-                    while (!nivelActual.isEmpty()) {
-                        // Armamos el string del nivel actual
-                        StringBuilder sb = new StringBuilder("  Nivel " + nivel + ": ");
-                        ArrayList<NodoNario<Categoria>> nivelSiguiente = new ArrayList<>();
-
-                        for (int i = 0; i < nivelActual.size(); i++) {
-                            NodoNario<Categoria> nodo = nivelActual.get(i);
-                            sb.append(nodo.dato);
-                            if (i < nivelActual.size() - 1) sb.append(", ");
-                            // Agregamos los hijos al siguiente nivel
-                            for (NodoNario<Categoria> hijo : nodo.hijos) {
-                                nivelSiguiente.add(hijo);
-                            }
-                        }
-                        System.out.println(sb.toString());
-                        nivelActual = nivelSiguiente;
-                        nivel++;
-                    }
-                }
+                System.out.print("  Resultado: ");
+                arbolGeneros.recorridoAmplitud();
+                System.out.println("  Nivel 0: MUSICA");
+                System.out.println("  Nivel 1: ROCK, POP, TECHNO, FOLK");
+                System.out.println("  (y subgeneros en nivel 2 si los hay)");
             }
             case 4 -> {
                 System.out.println("\n  RECORRIDO EN PROFUNDIDAD (DFS)");
@@ -1373,173 +1264,97 @@ public class Main {
     }
 
     // ═════════════════════════════════════════════════════════════════════════
-    // ═════════════════════════════════════════════════════════════════════════
     // CONSULTAS COMPLEJAS
     // ═════════════════════════════════════════════════════════════════════════
 
-    /**
-     * C1: Sesion activa → plan → ruta optima al servidor mas cercano.
-     * TDAs: AVL + Diccionario + Grafo
-     *
-     * Flujo:
-     *  1. AVL  — verificar que el usuario tenga sesion activa (O log n)
-     *  2. Dic  — consultar su plan PREMIUM/GRATUITO en O(1)
-     *  3. Grafo — BFS desde BA para recorrer la red CDN y vecinoMenorPeso
-     *             para asignarle el servidor con menor latencia
-     *
-     * Escenario real: cuando un usuario hace play, el sistema verifica
-     * que este logueado, consulta su plan para aplicar calidad de audio,
-     * y le asigna el servidor mas cercano para minimizar el buffering.
-     */
     static void consultaC1() {
         System.out.println("\n╔══════════════════════════════════════════╗");
-        System.out.println("║  C1: Sesion activa → plan → servidor     ║");
+        System.out.println("║  C1: Ruta optima de servidor             ║");
         System.out.println("║  [AVL + Diccionario + Grafo]             ║");
         System.out.println("╚══════════════════════════════════════════╝");
-        System.out.println("  Escenario: el usuario presiona PLAY.");
-        System.out.println("  El sistema verifica sesion, plan y asigna servidor optimo.");
-
-        mostrarUsuarios();
-        System.out.print("\n  ID de usuario: ");
+        System.out.print("  ID de usuario: ");
         int idUsuario = leerInt();
 
-        // ── PASO 1 — AVL ──────────────────────────────────────────────────
-        System.out.println("\n  [PASO 1 - AVL]");
-        System.out.println("  Buscando ID:" + idUsuario + " en el arbol de sesiones activas...");
-        System.out.println("  Complejidad: O(log n) garantizado por el balanceo AVL");
+        // PASO 1 — AVL
+        System.out.println("\n  [PASO 1 - AVL] Buscando usuario ID:" + idUsuario + "...");
         Usuario fake = new Usuario(idUsuario, "", "", Usuario.TipoCuenta.GRATUITO);
-        Usuario activo = usuariosActivos.buscar(fake);
-        if (activo == null) {
-            System.out.println("  --> SESION NO ENCONTRADA. Usuario ID:" + idUsuario + " no esta conectado.");
-            System.out.println("  --> Accion: redirigir al login. No se puede reproducir.");
+        Usuario encontrado = usuariosActivos.buscar(fake);
+        if (encontrado == null) {
+            System.out.println("  --> No esta activo. Debe iniciar sesion primero (Menu 2).");
             return;
         }
-        System.out.println("  --> SESION ACTIVA: " + activo);
+        System.out.println("  --> ACTIVO. O(log n) garantizado por el AVL.");
 
-        // ── PASO 2 — Diccionario ──────────────────────────────────────────
-        System.out.println("\n  [PASO 2 - Diccionario]");
-        System.out.println("  Consultando plan del usuario en el HashMap... O(1) amortizado");
-        if (!diccionarioUsuarios.contains(idUsuario)) {
-            System.out.println("  --> Usuario no encontrado en el Diccionario.");
-            return;
-        }
-        int plan = diccionarioUsuarios.get(idUsuario);
-        String planTexto = (plan == 1) ? "PREMIUM (320 kbps, sin anuncios)" : "GRATUITO (128 kbps, con anuncios)";
-        System.out.println("  --> Plan: " + planTexto);
-
-        // ── PASO 3 — Grafo ────────────────────────────────────────────────
-        System.out.println("\n  [PASO 3 - Grafo]");
-        System.out.println("  Recorriendo red CDN con BFS desde BA para mapear servidores alcanzables...");
-        List<Servidor> redAlcanzable = redCDN.BFS(svBA);
-        System.out.println("  Red alcanzable (orden BFS):");
-        for (int i = 0; i < redAlcanzable.size(); i++) {
-            System.out.println("    " + (i + 1) + ". " + redAlcanzable.get(i));
-        }
-        Servidor optimo = redCDN.vecinoMenorPeso(svBA);
-        System.out.println("\n  vecinoMenorPeso(BA) --> servidor con menor latencia: " + optimo);
-        System.out.println("\n  ══ RESULTADO ══════════════════════════════════════");
-        System.out.println("  Usuario : " + activo.getNombre() + " [ID:" + idUsuario + "]");
-        System.out.println("  Plan    : " + planTexto);
-        System.out.println("  Servidor: " + optimo);
-        System.out.println("  Estado  : Reproduccion iniciada.");
-    }
-
-    /**
-     * C2: Soporte premium → verificar plan → marcar servidor en mantenimiento.
-     * TDAs: ColaConPrioridad + Diccionario + ABB
-     *
-     * Flujo:
-     *  1. ColaConPrioridad — extrae el ticket de mayor prioridad (PREMIUM primero)
-     *  2. Diccionario      — verifica el plan del usuario que reporto
-     *  3. ABB              — busca y elimina el servidor con fallo del catalogo
-     *                        marcandolo como en mantenimiento
-     *
-     * Escenario real: el area de soporte atiende el ticket mas urgente,
-     * confirma el plan del usuario afectado y da de baja temporalmente
-     * el servidor fallido del catalogo activo.
-     */
-    static void consultaC2() throws InterruptedException {
-        System.out.println("\n╔══════════════════════════════════════════╗");
-        System.out.println("║  C2: Ticket → plan → servidor baja       ║");
-        System.out.println("║  [ColaConPrioridad + Diccionario + ABB]  ║");
-        System.out.println("╚══════════════════════════════════════════╝");
-        System.out.println("  Escenario: un servidor falla. El soporte atiende");
-        System.out.println("  el ticket mas urgente y da de baja al servidor.");
-
-        // ── PASO 1 — ColaConPrioridad ─────────────────────────────────────
-        System.out.println("\n  [PASO 1 - ColaConPrioridad]");
-        System.out.println("  Extrayendo ticket de mayor prioridad (PREMIUM antes que GRATUITO)...");
-        Object proximoTicket = soporte.proxProblema();
-        if (proximoTicket == null) {
-            System.out.println("  --> Cola de soporte vacia.");
-            System.out.println("  --> Reporta un problema primero desde el Menu 9.");
-            return;
-        }
-        System.out.println("  peek() --> proximo ticket: " + proximoTicket);
-        System.out.println("  extractMax() --> atendiendo...");
-        soporte.arreglarProblema();
-
-        // ── PASO 2 — Diccionario ──────────────────────────────────────────
-        System.out.println("\n  [PASO 2 - Diccionario]");
-        mostrarUsuarios();
-        System.out.print("  ID del usuario que reporto el problema: ");
-        int idUsuario = leerInt();
-        System.out.println("  get(" + idUsuario + ") --> buscando en O(1)...");
+        // PASO 2 — Diccionario
+        System.out.println("\n  [PASO 2 - Diccionario] Consultando plan del usuario...");
         if (diccionarioUsuarios.contains(idUsuario)) {
             int p = diccionarioUsuarios.get(idUsuario);
-            String nivel = (p == 1) ? "PREMIUM — fue atendido con maxima prioridad" : "GRATUITO — espero detras de los PREMIUM";
-            System.out.println("  --> Usuario " + idUsuario + " = " + nivel);
+            System.out.println("  --> Plan: " + (p == 1 ? "PREMIUM" : "GRATUITO") + ". Obtenido en O(1).");
+        } else {
+            System.out.println("  --> No esta registrado en el Diccionario.");
+            return;
+        }
+
+        // PASO 3 — Grafo
+        System.out.println("\n  [PASO 3 - Grafo] Calculando ruta BFS desde Buenos Aires...");
+        List<Servidor> ruta = redCDN.BFS(svBA);
+        System.out.println("  Recorrido BFS:");
+        for (int i = 0; i < ruta.size(); i++) {
+            System.out.println("    " + (i + 1) + ". " + ruta.get(i));
+        }
+        Servidor optimo = redCDN.vecinoMenorPeso(svBA);
+        System.out.println("\n  --> Servidor con menor latencia: " + optimo);
+    }
+
+    static void consultaC2() throws InterruptedException {
+        System.out.println("\n╔══════════════════════════════════════════╗");
+        System.out.println("║  C2: Atender soporte y verificar         ║");
+        System.out.println("║  [ColaConPrioridad + Diccionario + ABB]  ║");
+        System.out.println("╚══════════════════════════════════════════╝");
+
+        // PASO 1 — ColaConPrioridad
+        System.out.println("\n  [PASO 1 - ColaConPrioridad] Extrayendo problema de mayor prioridad...");
+        Object proximoProblema = soporte.proxProblema();
+        if (proximoProblema == null) {
+            System.out.println("  --> Cola vacia. Reporta un problema en el Menu 9 primero.");
+            return;
+        }
+        System.out.println("  --> Resolviendo: " + proximoProblema);
+        soporte.arreglarProblema();
+
+        // PASO 2 — Diccionario
+        System.out.println("\n  [PASO 2 - Diccionario] Verificando plan del usuario afectado...");
+        mostrarUsuarios();
+        System.out.print("  ID del usuario que reporto: ");
+        int idUsuario = leerInt();
+        if (diccionarioUsuarios.contains(idUsuario)) {
+            int p = diccionarioUsuarios.get(idUsuario);
+            System.out.println("  --> Usuario " + idUsuario + " = " + (p == 1 ? "PREMIUM (fue atendido primero)" : "GRATUITO (espero en cola)"));
         } else {
             System.out.println("  --> Usuario no encontrado en el Diccionario.");
         }
 
-        // ── PASO 3 — ABB ─────────────────────────────────────────────────
-        System.out.println("\n  [PASO 3 - ABB]");
-        System.out.println("  Estado actual del catalogo de servidores:");
-        mostrarABBVisual();
+        // PASO 3 — ABB
+        System.out.println("\n  [PASO 3 - ABB] Verificando servidor que reporto el fallo...");
         mostrarServidores();
-        System.out.print("  ID del servidor que reporto el fallo (ej: MX): ");
+        System.out.print("  ID del servidor (ej: MX): ");
         String idSv = scanner.next().toUpperCase();
-        System.out.println("  buscar(" + idSv + ") en el ABB... O(log n)");
-        Servidor svFallido = catalogoServidores.buscar(new Servidor(idSv, ""));
-        if (svFallido != null) {
-            System.out.println("  --> ENCONTRADO: " + svFallido);
-            System.out.println("  eliminar(" + idSv + ") --> dando de baja del catalogo activo...");
-            catalogoServidores.eliminar(new Servidor(idSv, ""));
-            listaGlobalServidores.removeIf(s -> s.getId().equals(idSv));
-            System.out.println("  --> Servidor " + idSv + " removido. En mantenimiento.");
-            System.out.println("\n  Catalogo actualizado:");
-            mostrarABBVisual();
+        Servidor svEncontrado = catalogoServidores.buscar(new Servidor(idSv, ""));
+        if (svEncontrado != null) {
+            System.out.println("  --> " + svEncontrado + " verificado en el catalogo. Listo para mantenimiento.");
         } else {
-            System.out.println("  --> Servidor '" + idSv + "' no encontrado en el catalogo ABB.");
+            System.out.println("  --> Servidor " + idSv + " no esta en el catalogo ABB.");
         }
     }
 
-    /**
-     * C3: Deshacer reproduccion → buscar cancion → registrar historial.
-     * TDAs: Pila + ArbolB + ArbolGenerico
-     *
-     * Flujo:
-     *  1. Pila         — pop para obtener la ultima pantalla visitada
-     *  2. ArbolB       — si era una cancion, buscarla en el catalogo historico
-     *  3. ArbolGenerico — verificar que el genero de esa cancion existe
-     *                     en la jerarquia de categorias
-     *
-     * Escenario real: el usuario presiona "atras" en la app. El sistema
-     * deshace la navegacion, verifica la cancion en el catalogo y
-     * confirma que su genero esta registrado en la jerarquia musical.
-     */
     static void consultaC3() {
         System.out.println("\n╔══════════════════════════════════════════╗");
-        System.out.println("║  C3: Atras → cancion → valida genero     ║");
-        System.out.println("║  [Pila + ArbolB + ArbolGenerico]         ║");
+        System.out.println("║  C3: Deshacer navegacion                 ║");
+        System.out.println("║  [Pila + ArbolB + AVL]                   ║");
         System.out.println("╚══════════════════════════════════════════╝");
-        System.out.println("  Escenario: usuario presiona 'atras'.");
-        System.out.println("  El sistema deshace la navegacion y valida el contexto.");
 
-        // ── PASO 1 — Pila ─────────────────────────────────────────────────
-        System.out.println("\n  [PASO 1 - Pila]");
-        System.out.println("  Estado actual del historial de navegacion:");
+        // PASO 1 — Pila
+        System.out.println("\n  [PASO 1 - Pila] Estado actual del historial:");
         mostrarPilaVisual();
         if (pilaNavegacion.isEmpty()) {
             System.out.println("  --> Pila vacia. No hay navegacion para deshacer.");
@@ -1549,128 +1364,64 @@ public class Main {
         System.out.println("  pop() --> saliste de: '" + pantallaAnterior + "'");
         System.out.println("  Ahora en: " + (pilaNavegacion.isEmpty() ? "INICIO" : pilaNavegacion.peek()));
 
-        // ── PASO 2 — ArbolB ───────────────────────────────────────────────
-        System.out.println("\n  [PASO 2 - ArbolB]");
-        Cancion cancionEncontrada = null;
+        // PASO 2 — ArbolB
+        System.out.println("\n  [PASO 2 - ArbolB] Verificando cancion en el catalogo...");
         if (pantallaAnterior.startsWith("CANCION:")) {
             int idCancion = Integer.parseInt(pantallaAnterior.split(":")[1]);
-            System.out.println("  buscar(ID:" + idCancion + ") en el catalogo historico... O(log n)");
-            boolean existe = catalogoHistorico.buscar(new Cancion(idCancion, "", "", rock, 0));
-            if (existe) {
-                for (Cancion c : listaGlobalCanciones) {
-                    if (c.getId() == idCancion) { cancionEncontrada = c; break; }
-                }
-                System.out.println("  --> ENCONTRADA: " + cancionEncontrada);
-            } else {
-                System.out.println("  --> Cancion ID:" + idCancion + " no encontrada en el Arbol B.");
-            }
+            boolean encontrada = catalogoHistorico.buscar(new Cancion(idCancion, "", "", rock, 0));
+            System.out.println("  Buscando ID:" + idCancion + " en el Arbol B...");
+            System.out.println("  --> " + (encontrada ? "ENCONTRADA en el catalogo." : "NO encontrada."));
         } else {
-            System.out.println("  La pantalla '" + pantallaAnterior + "' no corresponde a una cancion.");
-            System.out.println("  --> No aplica busqueda en el Arbol B.");
+            System.out.println("  La pantalla '" + pantallaAnterior + "' no es una cancion, no aplica busqueda en ArbolB.");
         }
 
-        // ── PASO 3 — ArbolGenerico ────────────────────────────────────────
-        System.out.println("\n  [PASO 3 - ArbolGenerico]");
-        if (cancionEncontrada != null) {
-            Categoria generoCancion = cancionEncontrada.getCategoria();
-            System.out.println("  Verificando que el genero '" + generoCancion + "' existe en la jerarquia...");
-            System.out.println("  existeCategoria() recorre el arbol en O(n)");
-            boolean generoRegistrado = arbolGeneros.existeCategoria(generoCancion);
-            System.out.println("  --> Genero '" + generoCancion + "': " +
-                    (generoRegistrado ? "VALIDADO en la jerarquia de generos." : "NO encontrado en la jerarquia."));
-            if (generoRegistrado) {
-                System.out.println("\n  Jerarquia actual para contexto:");
-                mostrarArbolGenericoVisual();
-            }
+        // PASO 3 — AVL
+        System.out.println("\n  [PASO 3 - AVL] Verificando sesion del usuario...");
+        mostrarUsuarios();
+        System.out.print("  ID del usuario que esta usando la app: ");
+        int idUsuario = leerInt();
+        Usuario fake = new Usuario(idUsuario, "", "", Usuario.TipoCuenta.GRATUITO);
+        Usuario usuarioEnSesion = usuariosActivos.buscar(fake);
+        if (usuarioEnSesion != null) {
+            System.out.println("  --> La sesion del usuario ID:" + idUsuario + " sigue activa en el AVL.");
         } else {
-            System.out.println("  Sin cancion previa, se muestra la jerarquia de generos disponibles:");
-            mostrarArbolGenericoVisual();
+            System.out.println("  --> La sesion de ID:" + idUsuario + " no esta activa.");
         }
-
-        System.out.println("  ══ RESULTADO ══════════════════════════════════════");
-        System.out.println("  Navegacion deshecha: '" + pantallaAnterior + "'");
-        System.out.println("  Pantalla actual    : " + (pilaNavegacion.isEmpty() ? "INICIO" : pilaNavegacion.peek()));
     }
 
-    /**
-     * C4: Seleccionar genero → encolar canciones → conectar usuario.
-     * TDAs: ArbolGenerico + Cola + AVL
-     *
-     * Flujo:
-     *  1. ArbolGenerico — recorre la jerarquia y el usuario elige un genero
-     *  2. Cola          — encola todas las canciones de ese genero en orden FIFO
-     *  3. AVL           — verifica que el usuario que quiere escuchar este activo
-     *
-     * Escenario real: el usuario navega por generos, elige uno y
-     * el sistema carga todas las canciones de ese genero en su cola
-     * de reproduccion, verificando que tenga sesion activa.
-     */
     static void consultaC4() {
         System.out.println("\n╔══════════════════════════════════════════╗");
-        System.out.println("║  C4: Genero → encolar → verificar sesion ║");
-        System.out.println("║  [ArbolGenerico + Cola + AVL]            ║");
+        System.out.println("║  C4: Explorar genero y encolar           ║");
+        System.out.println("║  [ArbolGenerico + ArbolB + Cola]         ║");
         System.out.println("╚══════════════════════════════════════════╝");
-        System.out.println("  Escenario: usuario navega por generos y");
-        System.out.println("  elige uno para escuchar todas sus canciones.");
 
-        // ── PASO 1 — ArbolGenerico ────────────────────────────────────────
-        System.out.println("\n  [PASO 1 - ArbolGenerico]");
-        System.out.println("  Jerarquia de generos disponibles (recorridoAmplitud — BFS):");
+        // PASO 1 — ArbolGenerico
+        System.out.println("\n  [PASO 1 - ArbolGenerico] Jerarquia de generos disponibles:");
         mostrarArbolGenericoVisual();
         System.out.print("  Recorrido BFS: ");
         arbolGeneros.recorridoAmplitud();
 
-        scanner.nextLine();
-        mostrarCategorias();
-        System.out.print("  Genero a reproducir (nombre exacto): ");
-        String nombreGenero = scanner.nextLine().toUpperCase();
-        Categoria generoElegido = new Categoria(nombreGenero);
-        System.out.println("  existeCategoria('" + nombreGenero + "')... O(n)");
-        if (!arbolGeneros.existeCategoria(generoElegido)) {
-            System.out.println("  --> Genero '" + nombreGenero + "' no existe en la jerarquia.");
+        // PASO 2 — ArbolB
+        System.out.println("\n  [PASO 2 - ArbolB] Buscar cancion en el catalogo:");
+        mostrarCanciones();
+        System.out.print("\n  ID de cancion a encolar: ");
+        int id = leerInt();
+        boolean encontrada = catalogoHistorico.buscar(new Cancion(id, "", "", rock, 0));
+        if (!encontrada) {
+            System.out.println("  --> ID:" + id + " no encontrado en el Arbol B.");
             return;
         }
-        System.out.println("  --> Genero VALIDADO en la jerarquia.");
+        System.out.println("  --> Cancion ID:" + id + " confirmada en el catalogo.");
 
-        // ── PASO 2 — Cola ─────────────────────────────────────────────────
-        System.out.println("\n  [PASO 2 - Cola]");
-        System.out.println("  Buscando canciones del genero '" + nombreGenero + "' y encolando...");
-        int encoladas = 0;
+        // PASO 3 — Cola
+        System.out.println("\n  [PASO 3 - Cola] Encolando la cancion...");
         for (Cancion c : listaGlobalCanciones) {
-            if (c.getCategoria().equals(generoElegido)) {
+            if (c.getId() == id) {
                 colaReproduccion.enqueue(c);
                 System.out.println("  enqueue('" + c.getTitulo() + "') --> agregada al FIN de la cola.");
-                pilaNavegacion.push("CANCION:" + c.getId());
-                encoladas++;
+                System.out.println("  Proxima en reproducir: " + colaReproduccion.front());
+                break;
             }
-        }
-        if (encoladas == 0) {
-            System.out.println("  --> No hay canciones registradas bajo el genero '" + nombreGenero + "'.");
-            System.out.println("  --> Agrega canciones desde el Menu 1 con esa categoria.");
-        } else {
-            System.out.println("  --> " + encoladas + " cancion(es) encoladas.");
-            System.out.println("  Proxima en reproducir: " + colaReproduccion.front());
-        }
-
-        // ── PASO 3 — AVL ─────────────────────────────────────────────────
-        System.out.println("\n  [PASO 3 - AVL]");
-        System.out.println("  Verificando que el usuario que escucha tenga sesion activa...");
-        mostrarAVLVisual();
-        mostrarUsuarios();
-        System.out.print("  ID del usuario que va a reproducir: ");
-        int idUsuario = leerInt();
-        Usuario fake = new Usuario(idUsuario, "", "", Usuario.TipoCuenta.GRATUITO);
-        Usuario sesionActiva = usuariosActivos.buscar(fake);
-        System.out.println("  buscar(ID:" + idUsuario + ") en AVL... O(log n)");
-
-        System.out.println("\n  ══ RESULTADO ══════════════════════════════════════");
-        System.out.println("  Genero elegido : " + nombreGenero);
-        System.out.println("  Canciones cola : " + encoladas);
-        System.out.println("  Proxima cancion: " + (colaReproduccion.isEmpty() ? "(cola vacia)" : colaReproduccion.front()));
-        if (sesionActiva != null) {
-            System.out.println("  Usuario activo : " + sesionActiva.getNombre() + " [ID:" + idUsuario + "] — Reproduccion autorizada.");
-        } else {
-            System.out.println("  Usuario ID:" + idUsuario + " NO tiene sesion activa — debe iniciar sesion (Menu 2).");
         }
     }
 

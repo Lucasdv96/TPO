@@ -1,6 +1,6 @@
 package Clases;
 
-public class Servidor {
+public class Servidor{
 
     private String id;
     private String ciudad;

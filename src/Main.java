@@ -1,12 +1,5 @@
 import Clases.*;
-import TDA.Diccionario;
-import TDA.ArbolB;
-import TDA.ArbolGenerico;
-import TDA.Cola;
-import TDA.Pila;
-import TDA.Abb;
-import TDA.Avl;
-import TDA.Grafo;
+import TDA.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +9,7 @@ import Clases.Categoria;
 import javax.swing.*;
 
 /**
- * Main — Sistema de Streaming de Audio (Espotifai)
+ * Main — Sistema de Streaming de Audio (Espotifai 🎵)
  *
  * P1 La cabra        → Arquitectura, Diccionario, Main, consultas complejas
  * P2 Lucas-Chan      → ABB + AVL
@@ -24,14 +17,13 @@ import javax.swing.*;
  * P4 Tobias tkm      → Pila + Cola + ColaConPrioridad (SoporteTecnico)
  * P5 Nestor-Kawai    → Grafo
  */
-
 public class Main {
     // ── TDA P1: Diccionario usuarios → prioridad (1=PREMIUM, 0=GRATUITO) ─────
     static Diccionario<Integer, Integer> diccionarioUsuarios = new Diccionario<>();
 
     // ── TDA P2: descomentar cuando Lucas-Chan entregue ────────────────────────
-    // static Abb<CreadorCont> catalogoCreadores = new Abb<>();
-    // static Avl<Usuario>     usuariosActivos   = new Avl<>();
+    static Abb<String> ordenServidoes = new Abb<>();
+    static Avl<Usuario> usuariosActivos = new Avl<>();
 
     // ── TDA P3: ArbolB y ArbolGenerico ────────────────────────────────────────
     static ArbolB<Cancion>       catalogoHistorico = new ArbolB<>();
@@ -66,6 +58,13 @@ public class Main {
     static Cancion c3 = new Cancion(3, "Strobe",                  "deadmau5",       techno, 601);
     static Cancion c4 = new Cancion(4, "La Llorona",              "Chavela Vargas", folk,   218);
     static Cancion c5 = new Cancion(5, "Smells Like Teen Spirit", "Nirvana",        metal,  301);
+
+    static Servidor svBA = new Servidor("BA", "Buenos Aires");
+    static Servidor svMX = new Servidor("MX", "México");
+    static Servidor svNY = new Servidor("NY", "Nueva York");
+    static Servidor svMD = new Servidor("MD", "Madrid");
+    static Servidor svSP = new Servidor("SP", "São Paulo");
+
 
     // ── Datos de prueba ───────────────────────────────────────────────────────
     static void cargarDatosPrueba() {
@@ -242,6 +241,19 @@ public class Main {
     static void menuABB() {
         System.out.println("\n── Catálogo de Creadores (ABB) ── [⏳ Lucas-Chan pendiente]");
         System.out.println("  Falta: insertar/buscar/eliminar/inorden.");
+
+        ordenServidoes.insertar(svBA.getCiudad());
+        ordenServidoes.insertar(svSP.getCiudad());
+        ordenServidoes.insertar(svMX.getCiudad());
+
+        String city = ordenServidoes.buscar(svMX.getCiudad());
+        System.out.println(city);
+
+        System.out.println(ordenServidoes.esVacio());
+        ordenServidoes.inorden();
+        ordenServidoes.eliminar(svBA.getCiudad());
+        System.out.println();
+
     }
 
     // ── 4. ÁRBOL N-ARIO ───────────────────────────────────────────────────────
@@ -406,7 +418,7 @@ public class Main {
     static void menuPila() {
         System.out.println("\n── Historial de Navegación (Pila) ──");
         System.out.println("  Pantalla actual: " + (pilaNavegacion.isEmpty() ? "ninguna" : pilaNavegacion.peek()));
-        System.out.println("  1. Ir a nueva pantalla (push)");
+        System.out.println("  1. Ir a nueva cancion (push)");
         System.out.println("  2. Volver atrás        (pop)");
         System.out.println("  3. Ver pantalla actual (peek)");
         System.out.print("  Opción: ");
@@ -464,6 +476,7 @@ public class Main {
                     System.out.println("  ⚠ La cola está vacía.");
                 } else {
                     Cancion c = colaReproduccion.dequeue();
+                    pilaNavegacion.push(c.getTitulo());
                     c.reproducir();
                     // Guardamos la canción reproducida en el historial de navegación
                     pilaNavegacion.push("CANCION:" + c.getId());

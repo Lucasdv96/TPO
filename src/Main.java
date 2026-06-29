@@ -17,12 +17,13 @@ import javax.swing.*;
  * P4 Tobias tkm      → Pila + Cola + ColaConPrioridad (SoporteTecnico)
  * P5 Nestor-Kawai    → Grafo
  */
+
 public class Main {
     // ── TDA P1: Diccionario usuarios → prioridad (1=PREMIUM, 0=GRATUITO) ─────
     static Diccionario<Integer, Integer> diccionarioUsuarios = new Diccionario<>();
 
     // ── TDA P2: descomentar cuando Lucas-Chan entregue ────────────────────────
-    static Abb<String> ordenServidoes = new Abb<>();
+    static Abb<Servidor> catalogoServidores = new Abb<>();
     static Avl<Usuario> usuariosActivos = new Avl<>();
 
     // ── TDA P3: ArbolB y ArbolGenerico ────────────────────────────────────────
@@ -110,9 +111,12 @@ public class Main {
         colaReproduccion.enqueue(c2);
         colaReproduccion.enqueue(c3);
 
-        // Creadores de contenido — pendiente P2
-        // CreadorCont canal1 = new CreadorCont(1, "rockclasico",  "Rock de los 70s-90s");
-        // catalogoCreadores.insertar(canal1);
+        // ABB: Servidores - P2
+        catalogoServidores.insertar(svBA);
+        catalogoServidores.insertar(svMX);
+        catalogoServidores.insertar(svNY);
+        catalogoServidores.insertar(svMD);
+        catalogoServidores.insertar(svSP);
 
         // Usuarios activos — pendiente P2
         // usuariosActivos.insertar(u1); usuariosActivos.insertar(u4); usuariosActivos.insertar(u5);
@@ -149,10 +153,10 @@ public class Main {
             System.out.println("\n╔══════════════════════════════════════════╗");
             System.out.println("║   SISTEMA DE STREAMING DE AUDIO          ║");
             System.out.println("╠══════════════════════════════════════════╣");
-            System.out.println("║  1.  Catálogo canciones  (Árbol B)       ║");
+            System.out.println("║  1.  Catálogo canciones  (Árbol B)        ║");
             System.out.println("║  2.  Usuarios activos    (AVL) ⏳         ║");
-            System.out.println("║  3.  Catálogo creadores  (ABB) ⏳         ║");
-            System.out.println("║  4.  Géneros musicales   (Árbol n-ario)  ║");
+            System.out.println("║  3.  Catálogo servidores (ABB) ✅         ║");
+            System.out.println("║  4.  Géneros musicales   (Árbol n-ario)   ║");
             System.out.println("║  5.  Red CDN             (Grafo) ✅       ║");
             System.out.println("║  6.  Historial           (Pila)           ║");
             System.out.println("║  7.  Cola reproducción   (Cola)           ║");
@@ -239,21 +243,61 @@ public class Main {
 
     // ── 3. ABB ────────────────────────────────────────────────────────────────
     static void menuABB() {
-        System.out.println("\n── Catálogo de Creadores (ABB) ── [⏳ Lucas-Chan pendiente]");
-        System.out.println("  Falta: insertar/buscar/eliminar/inorden.");
+        System.out.println("\n── Catálogo de Servidores Activos (ABB) ──");
+        System.out.println("  1. Registrar / Insertar nuevo Servidor");
+        System.out.println("  2. Buscar Servidor por ID");
+        System.out.println("  3. Dar de baja / Eliminar Servidor");
+        System.out.println("  4. Mostrar todos los Servidores (Inorden alfabético)");
+        System.out.print("  Opción: ");
 
-        ordenServidoes.insertar(svBA.getCiudad());
-        ordenServidoes.insertar(svSP.getCiudad());
-        ordenServidoes.insertar(svMX.getCiudad());
+        switch (leerInt()) {
+            case 1 -> {
+                scanner.nextLine(); // Limpiar buffer
+                System.out.print("  Ingrese ID del Servidor (ej: PT): ");
+                String id = scanner.nextLine().toUpperCase();
+                System.out.print("  Ingrese Nombre de la Ciudad: ");
+                String ciudad = scanner.nextLine();
 
-        String city = ordenServidoes.buscar(svMX.getCiudad());
-        System.out.println(city);
+                Servidor nuevoSv = new Servidor(id, ciudad);
+                catalogoServidores.insertar(nuevoSv);
+                System.out.println("  ✅ Servidor " + id + " insertado correctamente en el ABB.");
+            }
+            case 2 -> {
+                scanner.nextLine(); // Limpiar buffer
+                System.out.print("  Ingrese el ID del Servidor a buscar: ");
+                String idBusqueda = scanner.nextLine().toUpperCase();
 
-        System.out.println(ordenServidoes.esVacio());
-        ordenServidoes.inorden();
-        ordenServidoes.eliminar(svBA.getCiudad());
-        System.out.println();
+                // Creamos un objeto fantasma con el ID para la comparación
+                Servidor buscado = catalogoServidores.buscar(new Servidor(idBusqueda, ""));
+                if (buscado != null) {
+                    System.out.println("  ✅ Servidor encontrado: " + buscado.getCiudad() + " (" + buscado.getId() + ")");
+                } else {
+                    System.out.println("  ❌ El Servidor con ID " + idBusqueda + " no existe en el catálogo.");
+                }
+            }
+            case 3 -> {
+                scanner.nextLine(); // Limpiar buffer
+                System.out.print("  Ingrese el ID del Servidor a eliminar: ");
+                String idEliminar = scanner.nextLine().toUpperCase();
 
+                Servidor objetivo = new Servidor(idEliminar, "");
+                if (catalogoServidores.buscar(objetivo) != null) {
+                    catalogoServidores.eliminar(objetivo);
+                    System.out.println("  ✅ Servidor " + idEliminar + " eliminado del ABB.");
+                } else {
+                    System.out.println("  ❌ No se encontró el Servidor con ID " + idEliminar + ".");
+                }
+            }
+            case 4 -> {
+                System.out.println("\n  --- SERVIDORES REGISTRADOS (Inorden) ---");
+                if (catalogoServidores.esVacio()) {
+                    System.out.println("  (El árbol está vacío)");
+                } else {
+                    catalogoServidores.inorden();
+                }
+            }
+            default -> System.out.println("  ⚠ Opción inválida.");
+        }
     }
 
     // ── 4. ÁRBOL N-ARIO ───────────────────────────────────────────────────────

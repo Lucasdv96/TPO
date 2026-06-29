@@ -1,6 +1,6 @@
 package Clases;
 
-public class Servidor{
+public class Servidor implements Comparable<Servidor> {
 
     private String id;
     private String ciudad;
@@ -14,10 +14,15 @@ public class Servidor{
     public String getCiudad() { return ciudad; }
 
     @Override
+    public int compareTo(Servidor otro) {
+        // Ordenamiento alfabético por ID (ej: "BA" < "MX")
+        return this.id.compareTo(otro.id);
+    }
+
+    @Override
     public String toString() {
         return "Servidor[" + id + " - " + ciudad + "]";
     }
-
 
     @Override
     public boolean equals(Object o) {

@@ -34,6 +34,7 @@ public class Categoria {
         if (this == o) return true;
         if (!(o instanceof Categoria)) return false;
         return this.nombre.equalsIgnoreCase(((Categoria) o).nombre);
+
     }
 
     @Override

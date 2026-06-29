@@ -905,9 +905,10 @@ public class Main {
         arbolGeneros.recorridoAmplitud();
 
         // PASO 2 — ArbolB: buscar canción por ID en el catálogo
-        System.out.print("  ID de canción a encolar (1-5): ");
+        mostrarListas(listaGlobalCanciones);
+        System.out.print("  ID de canción a encolar: ");
         int id = leerInt();
-        boolean encontrada = catalogoHistorico.buscar(new Cancion(id, "", "", rock, 0));
+        boolean encontrada = catalogoHistorico.buscar(  new Cancion(id, "", "", rock, 0)   );
 
         if (!encontrada) {
             System.out.println("  [ArbolB] ❌ Canción ID " + id + " no encontrada en el catálogo.");
@@ -915,8 +916,8 @@ public class Main {
         }
 
         // PASO 3 — Cola: encolar la canción encontrada
-        Cancion[] todas = {c1, c2, c3, c4, c5};
-        for (Cancion c : todas) {
+
+        for (Cancion c : listaGlobalCanciones) {
             if (c.getId() == id) {
                 colaReproduccion.enqueue(c);
                 System.out.println("  [ArbolB] ✅ Encontrada: " + c);

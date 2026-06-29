@@ -71,7 +71,7 @@ public class Abb<T extends Comparable<T>> implements iAbb<T>{
             return null;
         }
         //PRIMERO COMPARAMOS
-        int cmp = nodo.dato.compareTo(dato);
+        int cmp = dato.compareTo(nodo.dato);
 
         if(cmp < 0){
             nodo.izq = eliminar(nodo.izq, dato);

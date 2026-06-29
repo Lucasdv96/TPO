@@ -4,15 +4,19 @@ import TDA.ArbolB;
 import TDA.ArbolGenerico;
 import TDA.Cola;
 import TDA.Pila;
-// import TDA.Abb;   ← descomentar cuando Lucas entregue
-// import TDA.Avl;   ← descomentar cuando Lucas entregue
+import TDA.Abb;
+import TDA.Avl;
 import TDA.Grafo;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import Clases.Categoria;
+
+import javax.swing.*;
 
 /**
- * Main — Sistema de Streaming de Audio (Espotifai 🎵)
+ * Main — Sistema de Streaming de Audio (Espotifai)
  *
  * P1 La cabra        → Arquitectura, Diccionario, Main, consultas complejas
  * P2 Lucas-Chan      → ABB + AVL
@@ -20,8 +24,8 @@ import java.util.Scanner;
  * P4 Tobias tkm      → Pila + Cola + ColaConPrioridad (SoporteTecnico)
  * P5 Nestor-Kawai    → Grafo
  */
-public class Main {
 
+public class Main {
     // ── TDA P1: Diccionario usuarios → prioridad (1=PREMIUM, 0=GRATUITO) ─────
     static Diccionario<Integer, Integer> diccionarioUsuarios = new Diccionario<>();
 
@@ -31,12 +35,13 @@ public class Main {
 
     // ── TDA P3: ArbolB y ArbolGenerico ────────────────────────────────────────
     static ArbolB<Cancion>       catalogoHistorico = new ArbolB<>();
-    static ArbolGenerico<String> arbolGeneros      = new ArbolGenerico<>();
+    static ArbolGenerico<Categoria> arbolGeneros      = new ArbolGenerico<>();
 
     // ── TDA P4: Pila, Cola y SoporteTecnico (usa ColaConPrioridad internamente)
     static Pila<String>           pilaNavegacion  = new Pila<>();
     static Cola<Cancion>          colaReproduccion = new Cola<>();
     static SoporteTecnico<String> soporte          = new SoporteTecnico<>();
+    static ArrayList<Cancion> listaGlobalCanciones = new ArrayList<>();
 
     // ── TDA P5: descomentar cuando Nestor-Kawai entregue ─────────────────────
     static Grafo<Servidor> redCDN = new Grafo<>();
@@ -44,11 +49,16 @@ public class Main {
     static Scanner scanner = new Scanner(System.in);
 
     // ── Categorías globales para reutilizar ───────────────────────────────────
+    static Categoria musica   = new Categoria("Musica");
     static Categoria rock   = new Categoria("Rock");
     static Categoria techno = new Categoria("Techno");
     static Categoria pop    = new Categoria("Pop");
     static Categoria metal  = new Categoria("Metal");
     static Categoria folk   = new Categoria("Folk");
+    static Categoria nacional   = new Categoria("Nacional");
+    static Categoria internacional   = new Categoria("Internacional");
+    static Categoria house   = new Categoria("House");
+    static Categoria deepHouse   = new Categoria("Deep House");
 
     // ── Canciones globales para reutilizar en submenús ───────────────────────
     static Cancion c1 = new Cancion(1, "Bohemian Rhapsody",      "Queen",          rock,   354);
@@ -84,14 +94,14 @@ public class Main {
         catalogoHistorico.insertar(c5);
 
         // ArbolGenerico: jerarquía de géneros musicales
-        arbolGeneros.agregarHijo(null,     "Música");
-        arbolGeneros.agregarHijo("Música", "Rock");
-        arbolGeneros.agregarHijo("Música", "Pop");
-        arbolGeneros.agregarHijo("Música", "Techno");
-        arbolGeneros.agregarHijo("Rock",   "Nacional");
-        arbolGeneros.agregarHijo("Rock",   "Internacional");
-        arbolGeneros.agregarHijo("Techno", "House");
-        arbolGeneros.agregarHijo("House",  "Deep House");
+        arbolGeneros.agregarHijo(null,     musica);
+        arbolGeneros.agregarHijo(musica, rock);
+        arbolGeneros.agregarHijo(musica, pop);
+        arbolGeneros.agregarHijo(musica, techno);
+        arbolGeneros.agregarHijo(rock,   nacional);
+        arbolGeneros.agregarHijo(rock, internacional);
+        arbolGeneros.agregarHijo(techno, house);
+        arbolGeneros.agregarHijo(house, deepHouse );
 
         // Pila: pantalla inicial de navegación
         pilaNavegacion.push("INICIO");
@@ -133,6 +143,7 @@ public class Main {
 
     // ── Menú principal ────────────────────────────────────────────────────────
     public static void main(String[] args) throws InterruptedException {
+        inicializarDatos();
         cargarDatosPrueba();
         int opcion;
         do {
@@ -237,8 +248,9 @@ public class Main {
     static void menuArbolNario() {
         System.out.println("\n── Géneros Musicales (Árbol n-ario) ──");
         System.out.println("  1. Agregar subgénero");
-        System.out.println("  2. Recorrido en amplitud  (BFS — nivel por nivel)");
-        System.out.println("  3. Recorrido en profundidad (DFS — rama por rama)");
+        System.out.println("  2. Buscar generos");
+        System.out.println("  3. Recorrido en amplitud  (BFS — nivel por nivel)");
+        System.out.println("  4. Recorrido en profundidad (DFS — rama por rama)");
         System.out.print("  Opción: ");
 
         switch (leerInt()) {
@@ -248,14 +260,52 @@ public class Main {
                 String padre = scanner.nextLine();
                 System.out.print("  Nuevo subgénero: ");
                 String hijo = scanner.nextLine();
-                arbolGeneros.agregarHijo(padre, hijo);
+
+
+                Categoria categoriaPadre = new Categoria(padre);
+                Categoria categoriaHijo = new Categoria(hijo);
+
+                arbolGeneros.agregarHijo(categoriaPadre, categoriaHijo);
+
                 System.out.println("  ✅ '" + hijo + "' agregado bajo '" + padre + "'.");
             }
             case 2 -> {
+                System.out.println("\n --- BUSCAR GENEROS ---");
+
+                scanner.nextLine();
+                System.out.print("  🎵 Ingresá el género/categoría a buscar (ej: Rock): ");
+                String nombreBuscar = scanner.nextLine();
+
+                Categoria categoriaBuscada = new Categoria(nombreBuscar);
+
+                if (arbolGeneros.existeCategoria(categoriaBuscada)) {
+                    System.out.println("\n ¡Género '" + nombreBuscar + "' validado en el Árbol Genérico!");
+                    System.out.println("Canciones encontradas en esta categoría:");
+                    System.out.println("  ──────────────────────────────────────────");
+
+                    boolean encontroAlguna = false;
+
+                    for (Cancion c : listaGlobalCanciones) {
+                        if (c.getCategoria().equals(categoriaBuscada)) {
+                            System.out.println("  ID: " + c.getId() + " | " + c.getTitulo() + " - " + c.getArtista());
+                            encontroAlguna = true;
+                        }
+                    }
+                    if (!encontroAlguna) {
+                        System.out.println("  (No hay canciones registradas bajo este género todavía).");
+                    }
+
+                } else {
+                    System.out.println("  ❌ Error: El género '" + nombreBuscar + "' no existe en la jerarquía del Árbol.");
+                }
+                System.out.println("  ──────────────────────────────────────────");
+
+            }
+            case 3 -> {
                 System.out.println("\n  --- RECORRIDO EN AMPLITUD (nivel por nivel) ---");
                 arbolGeneros.recorridoAmplitud();
             }
-            case 3 -> {
+            case 4 -> {
                 System.out.println("\n  --- RECORRIDO EN PROFUNDIDAD (rama por rama) ---");
                 arbolGeneros.recorridoProfundidad();
             }
@@ -738,5 +788,12 @@ public class Main {
             scanner.next();
         }
         return scanner.nextLine();
+    }
+    public static void inicializarDatos() {
+        listaGlobalCanciones.add(c1);
+        listaGlobalCanciones.add(c2);
+        listaGlobalCanciones.add(c3);
+        listaGlobalCanciones.add(c4);
+        listaGlobalCanciones.add(c5);
     }
 }

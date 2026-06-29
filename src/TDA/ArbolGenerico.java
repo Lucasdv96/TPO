@@ -38,7 +38,7 @@ public class ArbolGenerico <T> implements iArbolGenerico <T>{
     public void agregarHijo(T datoPadre, T datoHijo) {
         /*
         PRE:
-            datoPadre: recibe un datoPadre, como bie
+            datoPadre: recibe un datoPadre, c
          */
 
         if (esVacio()){
@@ -118,6 +118,11 @@ public class ArbolGenerico <T> implements iArbolGenerico <T>{
             }
         }
         System.out.println();
+    }
+
+    public boolean existeCategoria(T categoriaBuscada) {
+        NodoNario<T> nodoEncontrado = buscarNodo(this.raiz, categoriaBuscada);
+        return nodoEncontrado != null;
     }
 
     @Override

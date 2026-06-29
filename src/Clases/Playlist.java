@@ -8,8 +8,6 @@ import java.util.List;
  * Las canciones dentro se encolan en la Cola de reproducción al reproducir.
  */
 
-//Si tienen una idea mejor a la de simular una "cola de reproduccion" me avisan, sono muy violento, pero les juro que lo decia bien
-
 public class Playlist {
 
     private int id;

@@ -4,8 +4,8 @@ import TDA.ArbolB;
 import TDA.ArbolGenerico;
 import TDA.Cola;
 import TDA.Pila;
-// import TDA.Abb;   ← descomentar cuando Lucas entregue
-// import TDA.Avl;   ← descomentar cuando Lucas entregue
+import TDA.Abb;
+import TDA.Avl;
 import TDA.Grafo;
 
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ import Clases.Categoria;
 import javax.swing.*;
 
 /**
- * Main — Sistema de Streaming de Audio (Espotifai 🎵)
+ * Main — Sistema de Streaming de Audio (Espotifai)
  *
  * P1 La cabra        → Arquitectura, Diccionario, Main, consultas complejas
  * P2 Lucas-Chan      → ABB + AVL

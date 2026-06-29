@@ -118,9 +118,6 @@ public class Main {
         catalogoServidores.insertar(svMD);
         catalogoServidores.insertar(svSP);
 
-        // Usuarios activos — pendiente P2
-        // usuariosActivos.insertar(u1); usuariosActivos.insertar(u4); usuariosActivos.insertar(u5);
-
         // TODO P5: construir red CDN en Grafo
         // Red CDN — P5
         Servidor svBA = new Servidor("BA", "Buenos Aires");
@@ -141,6 +138,14 @@ public class Main {
         redCDN.agregarArista(svNY, svMD, 80);   // NY - Madrid: 80ms
         redCDN.agregarArista(svMD, svSP, 200);  // Madrid - São Paulo: 200ms
 
+        // Usuarios activos — P2 (¡Ahora funcionando!)
+        u1.setActivo(true);
+        u4.setActivo(true);
+        u5.setActivo(true);
+        usuariosActivos.insertar(u1);
+        usuariosActivos.insertar(u4);
+        usuariosActivos.insertar(u5);
+
         System.out.println("Datos de prueba subidos perfectamente.");
     }
 
@@ -154,7 +159,7 @@ public class Main {
             System.out.println("║   SISTEMA DE STREAMING DE AUDIO          ║");
             System.out.println("╠══════════════════════════════════════════╣");
             System.out.println("║  1.  Catálogo canciones  (Árbol B)        ║");
-            System.out.println("║  2.  Usuarios activos    (AVL) ⏳         ║");
+            System.out.println("║  2.  Usuarios activos    (AVL) ✅         ║");
             System.out.println("║  3.  Catálogo servidores (ABB) ✅         ║");
             System.out.println("║  4.  Géneros musicales   (Árbol n-ario)   ║");
             System.out.println("║  5.  Red CDN             (Grafo) ✅       ║");
@@ -237,8 +242,73 @@ public class Main {
 
     // ── 2. AVL ────────────────────────────────────────────────────────────────
     static void menuAVL() {
-        System.out.println("\n── Usuarios Activos (AVL) ── [⏳ Lucas-Chan pendiente]");
-        System.out.println("  Falta: insertar/buscar/eliminar/mostrarAltura/factorEquilibrio.");
+        System.out.println("\n── Usuarios Activos (AVL) ──");
+        System.out.println("  1. Iniciar sesión / Conectar (Insertar)");
+        System.out.println("  2. Buscar usuario conectado");
+        System.out.println("  3. Cerrar sesión / Desconectar (Eliminar)");
+        System.out.println("  4. Métricas (Altura y Factor de Equilibrio)");
+        System.out.print("  Opción: ");
+
+        switch (leerInt()) {
+            case 1 -> {
+                System.out.print("  ID del usuario a conectar: ");
+                int id = leerInt();
+
+                // Verificamos si existe en nuestro sistema (Diccionario) primero
+                if (diccionarioUsuarios.contains(id)) {
+                    int plan = diccionarioUsuarios.get(id);
+                    Usuario.TipoCuenta tipo = (plan == 1) ? Usuario.TipoCuenta.PREMIUM : Usuario.TipoCuenta.GRATUITO;
+
+                    // Creamos el usuario con el constructor manual para mantener el ID
+                    Usuario uActivo = new Usuario(id, "Usuario_" + id, "email@mail.com", tipo);
+                    uActivo.setActivo(true);
+
+                    usuariosActivos.insertar(uActivo);
+                    System.out.println("  ✅ Usuario ID " + id + " conectado e insertado en el AVL.");
+                } else {
+                    System.out.println("  ❌ Usuario no registrado. Registrelo primero en el Diccionario (Menú 8).");
+                }
+            }
+            case 2 -> {
+                System.out.print("  ID del usuario a buscar: ");
+                int id = leerInt();
+
+                Usuario fantasma = new Usuario(id, "", "", Usuario.TipoCuenta.GRATUITO);
+                Usuario encontrado = usuariosActivos.buscar(fantasma);
+
+                if (encontrado != null) {
+                    System.out.println("  ✅ El usuario ID " + id + " está ACTIVO en el sistema.");
+                } else {
+                    System.out.println("  ❌ El usuario ID " + id + " NO está activo.");
+                }
+            }
+            case 3 -> {
+                System.out.print("  ID del usuario a desconectar: ");
+                int id = leerInt();
+
+                Usuario fantasma = new Usuario(id, "", "", Usuario.TipoCuenta.GRATUITO);
+                if (usuariosActivos.buscar(fantasma) != null) {
+                    usuariosActivos.eliminar(fantasma);
+                    System.out.println("  ✅ Usuario ID " + id + " desconectado (eliminado del AVL).");
+                } else {
+                    System.out.println("  ❌ El usuario ID " + id + " no estaba activo.");
+                }
+            }
+            case 4 -> {
+                System.out.println("  📈 Altura actual del árbol AVL: " + usuariosActivos.mostrarAltura());
+                System.out.print("  Ingrese ID de un usuario activo para ver su Factor de Equilibrio: ");
+                int id = leerInt();
+
+                Usuario fantasma = new Usuario(id, "", "", Usuario.TipoCuenta.GRATUITO);
+                if (usuariosActivos.buscar(fantasma) != null) {
+                    int fe = usuariosActivos.factorEquilibrio(fantasma);
+                    System.out.println("  ⚖ Factor de equilibrio del nodo (ID " + id + "): " + fe);
+                } else {
+                    System.out.println("  ❌ El usuario ID " + id + " no está en el árbol AVL.");
+                }
+            }
+            default -> System.out.println("  ⚠ Opción inválida.");
+        }
     }
 
     // ── 3. ABB ────────────────────────────────────────────────────────────────
@@ -674,11 +744,6 @@ public class Main {
     /**
      * C1: Ruta óptima de servidor para un usuario activo.
      * TDAs: AVL + Diccionario + Grafo
-     *
-     * Flujo:
-     * 1. Buscar el usuario en el AVL (verifica que esté activo).
-     * 2. Consultar su plan en el Diccionario.
-     * 3. BFS en el Grafo CDN para encontrar el servidor con menor latencia.
      */
     static void consultaC1() {
         System.out.println("\n── C1: Ruta óptima de servidor ──");
@@ -687,107 +752,101 @@ public class Main {
         int idUsuario = leerInt();
 
         // PASO 1 — AVL: verificar que el usuario esté activo
-        // TODO P2 → descomentar cuando Lucas-Chan entregue Avl.java:
-        // Usuario fake = new Usuario(idUsuario, "", "", Usuario.TipoCuenta.GRATUITO);
-        // Usuario encontrado = (Usuario) usuariosActivos.buscar(fake);
-        // if (encontrado == null) { System.out.println("Usuario no activo."); return; }
-        System.out.println("  [AVL] Buscando usuario ID " + idUsuario + "... ⏳ P2 pendiente");
+        Usuario fake = new Usuario(idUsuario, "", "", Usuario.TipoCuenta.GRATUITO);
+        Usuario encontrado = usuariosActivos.buscar(fake);
+        if (encontrado == null) {
+            System.out.println("  [AVL] ❌ Usuario no activo. No se puede calcular ruta.");
+            return;
+        }
+        System.out.println("  [AVL] ✅ Usuario ID " + idUsuario + " validado como activo.");
 
         // PASO 2 — Diccionario: consultar su plan
         if (diccionarioUsuarios.contains(idUsuario)) {
             int p = diccionarioUsuarios.get(idUsuario);
-            System.out.println("  [Diccionario] ✅ Usuario " + idUsuario
-                    + " → " + (p == 1 ? "PREMIUM" : "GRATUITO"));
+            System.out.println("  [Diccionario] ✅ Plan: " + (p == 1 ? "PREMIUM" : "GRATUITO"));
         } else {
             System.out.println("  [Diccionario] ❌ Usuario no registrado.");
             return;
         }
 
         // PASO 3 — Grafo: BFS para ruta óptima y servidor con menor latencia
-        Servidor svBA = new Servidor("BA", "Buenos Aires");
         System.out.println("  [Grafo] BFS desde BA: " + redCDN.BFS(svBA));
         Servidor optimo = redCDN.vecinoMenorPeso(svBA);
         System.out.println("  [Grafo] ✅ Servidor con menor latencia desde BA: " + optimo);
     }
 
     /**
-     * C2: Atender problema de soporte y verificar plan del usuario.
+     * C2: Atender problema de soporte y verificar servidor.
      * TDAs: ColaConPrioridad + Diccionario + ABB
-     *
-     * Flujo:
-     * 1. Extraer el problema de mayor prioridad del SoporteTecnico.
-     * 2. Verificar en el Diccionario el plan del usuario que reportó.
-     * 3. Buscar el creador de contenido relacionado en el ABB.
      */
     static void consultaC2() throws InterruptedException {
-        System.out.println("\n── C2: Atender soporte y verificar plan ──");
+        System.out.println("\n── C2: Atender soporte y verificar infraestructura ──");
         System.out.println("  [ColaConPrioridad + Diccionario + ABB]");
 
-        // PASO 1 — ColaConPrioridad: extraer el problema de mayor prioridad
+        // PASO 1 — ColaConPrioridad: extraer el problema
         Object proximoProblema = soporte.proxProblema();
         if (proximoProblema == null) {
-            System.out.println("  [ColaConPrioridad] ⚠ No hay problemas pendientes.");
-            System.out.println("  → Reportá un problema desde el menú 9 primero.");
+            System.out.println("  [ColaConPrioridad] ⚠ No hay problemas pendientes. Reportá uno en el Menú 9.");
             return;
         }
         System.out.println("  [ColaConPrioridad] ✅ Resolviendo: " + proximoProblema);
         soporte.arreglarProblema();
 
-        // PASO 2 — Diccionario: verificar qué plan tiene el usuario afectado
+        // PASO 2 — Diccionario: verificar qué plan tiene el afectado
         System.out.print("  ID del usuario que reportó el problema: ");
         int idUsuario = leerInt();
         if (diccionarioUsuarios.contains(idUsuario)) {
             int p = diccionarioUsuarios.get(idUsuario);
             System.out.println("  [Diccionario] ✅ Usuario " + idUsuario
-                    + " → " + (p == 1 ? "PREMIUM (fue atendido primero ✅)" : "GRATUITO (esperó su turno)"));
+                    + " → " + (p == 1 ? "PREMIUM (Atendido con prioridad ✅)" : "GRATUITO"));
         } else {
-            System.out.println("  [Diccionario] ❌ Usuario no encontrado en el diccionario.");
+            System.out.println("  [Diccionario] ❌ Usuario no encontrado.");
         }
 
-        // PASO 3 — ABB: buscar el creador de contenido relacionado
-        // TODO P2 → descomentar cuando Lucas-Chan entregue Abb.java:
-        // CreadorCont fake = new CreadorCont(0, nombreCreador, "");
-        // CreadorCont encontrado = (CreadorCont) catalogoCreadores.buscar(fake);
-        System.out.println("  [ABB] Buscando creador relacionado... ⏳ P2 pendiente");
+        // PASO 3 — ABB: verificar el servidor asignado al problema
+        System.out.print("  [ABB] Ingrese ID del servidor que falló (ej. MX): ");
+        String idSv = scanner.next().toUpperCase();
+        Servidor svEncontrado = catalogoServidores.buscar(new Servidor(idSv, ""));
+        if (svEncontrado != null) {
+            System.out.println("  [ABB] ✅ Servidor " + svEncontrado.getCiudad() + " verificado en el catálogo para mantenimiento.");
+        } else {
+            System.out.println("  [ABB] ❌ El servidor " + idSv + " no figura en el árbol activo.");
+        }
     }
 
     /**
-     * C3: Deshacer navegación y verificar canción en catálogo.
+     * C3: Deshacer navegación, verificar canción y sesión.
      * TDAs: Pila + ArbolB + AVL
-     *
-     * Flujo:
-     * 1. Pop de la Pila para volver a la pantalla anterior.
-     * 2. Si era una canción, buscarla en el ArbolB.
-     * 3. Actualizar el estado del usuario en el AVL.
      */
     static void consultaC3() {
         System.out.println("\n── C3: Deshacer navegación ──");
         System.out.println("  [Pila + ArbolB + AVL]");
 
-        // PASO 1 — Pila: volver a la pantalla anterior
+        // PASO 1 — Pila: volver atrás
         if (pilaNavegacion.isEmpty()) {
-            System.out.println("  [Pila] ⚠ No hay historial de navegación.");
+            System.out.println("  [Pila] ⚠ No hay historial.");
             return;
         }
         String pantallaAnterior = pilaNavegacion.pop();
         System.out.println("  [Pila] ✅ Saliste de: " + pantallaAnterior);
-        System.out.println("         Ahora en: " + (pilaNavegacion.isEmpty() ? "INICIO" : pilaNavegacion.peek()));
 
-        // PASO 2 — ArbolB: si la pantalla era una canción, buscarla en el catálogo
-        // El menuCola() apila "CANCION:ID" cuando reproducís una canción
+        // PASO 2 — ArbolB: verificar canción
         if (pantallaAnterior.startsWith("CANCION:")) {
             int idCancion = Integer.parseInt(pantallaAnterior.split(":")[1]);
             boolean encontrada = catalogoHistorico.buscar(new Cancion(idCancion, "", "", rock, 0));
-            System.out.println("  [ArbolB] Canción ID " + idCancion
-                    + (encontrada ? " ✅ encontrada en el catálogo." : " ❌ no encontrada."));
-        } else {
-            System.out.println("  [ArbolB] La pantalla '" + pantallaAnterior + "' no tiene canción asociada.");
+            System.out.println("  [ArbolB] Canción ID " + idCancion + (encontrada ? " ✅ encontrada." : " ❌ no encontrada."));
         }
 
-        // PASO 3 — AVL: actualizar estado del usuario en sesión
-        // TODO P2 → descomentar cuando Lucas-Chan entregue Avl.java:
-        // usuariosActivos.buscar(usuarioEnSesion).setActivo(true);
-        System.out.println("  [AVL] Actualizando estado del usuario... ⏳ P2 pendiente");
+        // PASO 3 — AVL: verificar sesión
+        System.out.print("  [AVL] ID de usuario operando la app: ");
+        int idUsuario = leerInt();
+        Usuario fake = new Usuario(idUsuario, "", "", Usuario.TipoCuenta.GRATUITO);
+        Usuario usuarioEnSesion = usuariosActivos.buscar(fake);
+        if (usuarioEnSesion != null) {
+            System.out.println("  [AVL] ✅ La sesión del usuario ID " + idUsuario + " sigue activa.");
+        } else {
+            System.out.println("  [AVL] ⚠ La sesión expiró o el usuario no está activo.");
+        }
     }
 
     /**

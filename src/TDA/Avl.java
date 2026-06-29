@@ -40,8 +40,9 @@ public class Avl<T  extends Comparable<T>> implements iAvl<T> {
      * Si es 2: subárbol izquierdo demasiado alto → rotar derecha o izquierda-derecha.
      * Si es -2: subárbol derecho demasiado alto → rotar izquierda o derecha-izquierda.
      */
-    private int factorEquilibrio(NodoAVL<T> nodo) {  // si el resultado es 2 o -2 el arbol esta desbalanceado y hay que rotar
-        return altura(nodo.izq) + altura(nodo.der);
+    private int factorEquilibrio(NodoAVL<T> nodo) {
+        if (nodo == null) return 0;// si el resultado es 2 o -2 el arbol esta desbalanceado y hay que rotar
+        return altura(nodo.izq) - altura(nodo.der);
     }
 
 

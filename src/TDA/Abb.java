@@ -53,9 +53,8 @@ public class Abb<T extends Comparable<T>> implements iAbb<T>{
         }
         int cmp = nodo.dato.compareTo(dato); // compara nodo contra dato
         if(cmp < 0) return buscar(nodo.der, dato); // el nodo es menor, busco a la derecha
-        else if(cmp > 0){                          // el nodo es mayor, busco a la izquierda
-            return buscar(nodo.izq, dato);
-        }
+        else if(cmp > 0) return buscar(nodo.izq, dato);   // el nodo es mayor, busco a la izquierda
+
         return nodo.dato; // encontrado
     }
     /**

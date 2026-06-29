@@ -11,7 +11,7 @@ import Clases.Categoria;
  *
  * P1 Gabriel   → Diccionario + Main + Consultas complejas
  * P2 Lucas     → Abb + Avl
- * P3 Brichota  → ArbolB + ArbolGenerico
+ * P3 Brisa  → ArbolB + ArbolGenerico
  * P4 Tobias    → Pila + Cola + ColaConPrioridad + SoporteTecnico
  * P5 Nestor    → Grafo
  */

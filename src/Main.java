@@ -552,25 +552,10 @@ public class Main {
 
     /**
      * Muestra el Árbol B de canciones en forma visual por niveles (BFS).
-     * Dado que ArbolB no expone sus nodos, mostramos el inorden con separadores
      * para simular la estructura de páginas del árbol B.
      */
     static void mostrarArbolBVisual() {
-        System.out.println();
-        System.out.println("  CATALOGO HISTORICO DE CANCIONES (Arbol B, t=2)");
-        System.out.println("  Cada nodo puede tener hasta 3 claves (se ordenan por ID)");
-        System.out.println();
-        System.out.println("  Estructura (inorden — IDs en orden ascendente):");
-        System.out.println();
-        System.out.print("  [ ");
-        for (int i = 0; i < listaGlobalCanciones.size(); i++) {
-            Cancion c = listaGlobalCanciones.get(i);
-            System.out.print("ID:" + c.getId() + "=" + truncar(c.getTitulo(), 10));
-            if (i < listaGlobalCanciones.size() - 1) System.out.print(" | ");
-        }
-        System.out.println(" ]");
-        System.out.println();
-        System.out.println("  Detalle inorden completo:");
+        mostrarListas(listaGlobalCanciones);
         catalogoHistorico.mostrar();
     }
 
@@ -703,7 +688,7 @@ public class Main {
                     // Buscamos el nombre en la lista
                     String nombre = "desconocida";
                     for (Cancion c : listaGlobalCanciones) {
-                        if (c.getId() == idBusqueda) { nombre = c.getTitulo(); break; }
+                        if (c.getId() == idBusqueda) {nombre = c.getTitulo(); break; }
                     }
                     System.out.println("\n  Buscando ID " + idBusqueda + " en el Arbol B...");
                     System.out.println("  Comparando nodos... O(log n)");
@@ -717,6 +702,12 @@ public class Main {
                 System.out.print("  ID: ");
                 int id = leerInt();
                 scanner.nextLine();
+
+                if (catalogoHistorico.buscar(new Cancion(id, "", "", rock, 0))) {
+                    System.out.println(" Error: El ID " + id + " ya está registrado en el catálogo histórico.");
+                    return;
+                }
+
                 System.out.print("  Titulo: ");
                 String titulo = scanner.nextLine();
                 System.out.print("  Artista: ");

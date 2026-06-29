@@ -4,6 +4,7 @@ import Interfaces.iArbolB;
 
 import java.util.ArrayList;
 import java.util.List;
+import Clases.Cancion;
 
 public class ArbolB <T extends Comparable<T>> implements iArbolB <T>{
 
@@ -31,6 +32,10 @@ public class ArbolB <T extends Comparable<T>> implements iArbolB <T>{
 
     @Override
     public void insertar(T clave) {
+        if (this.buscar(clave)) {
+            return;
+        }
+
         NodoB<T> r = this.raiz;
 
         if (r.claves.size() == (2 * t - 1)) {
@@ -123,8 +128,8 @@ public class ArbolB <T extends Comparable<T>> implements iArbolB <T>{
         hijoNuevo.n++;
 
         if (!hijoLleno.esHoja) { //si es hoja quiere decir que tiene 4 nodos hijos por ende, los ultimos dos (que son los mas grandes los tengo que pasar a el nuevo nodo derecho del nuevo padre) un chino
-            hijoNuevo.hijos.add(hijoLleno.hijos.remove(2));
-            hijoNuevo.hijos.add(hijoLleno.hijos.remove(2));
+            hijoNuevo.hijos.add(0, hijoLleno.hijos.remove(3));
+            hijoNuevo.hijos.add(0, hijoLleno.hijos.remove(2));
         }
 
         hijoLleno.n = 1;
@@ -163,11 +168,42 @@ public class ArbolB <T extends Comparable<T>> implements iArbolB <T>{
     @Override
     public void mostrar() {
         if (esVacio()) {
-            System.out.println("El arbol está vacio.");
+            System.out.println("  El catálogo está vacío.");
             return;
         }
+        System.out.println("\n JERARQUÍA DEL ÁRBOL B (Por Niveles de profundidad):");
+        System.out.println("  ──────────────────────────────────────────────────");
+        mostrarEstructura(raiz, 0);
+        System.out.println("  ──────────────────────────────────────────────────\n");
+
+        System.out.print("  Detalle de claves (Inorden): ");
         mostrarRec(raiz);
         System.out.println();
+    }
+
+    private void mostrarEstructura(NodoB<T> nodo, int nivel) {
+        if (nodo == null) return;
+
+        int i;
+        // Recorremos los hijos de derecha a izquierda para que visualmente se lea bien de arriba a abajo
+        for (i = nodo.claves.size(); i > 0; i--) {
+            if (!nodo.esHoja && i < nodo.hijos.size()) {
+                mostrarEstructura(nodo.hijos.get(i), nivel + 1);
+            }
+
+            // Dejamos espacios según el nivel (profundidad) del nodo en el árbol
+            for (int j = 0; j < nivel; j++) {
+                System.out.print("        ");
+            }
+
+            // Imprimimos el ID de la canción
+            System.out.println("└─● [ID:" + ((Cancion) nodo.claves.get(i - 1)).getId() + "]");
+        }
+
+        // El último hijo que queda a la izquierda
+        if (!nodo.esHoja && i < nodo.hijos.size()) {
+            mostrarEstructura(nodo.hijos.get(i), nivel + 1);
+        }
     }
 
     private void mostrarRec(NodoB<T> nodo) {
@@ -178,14 +214,13 @@ public class ArbolB <T extends Comparable<T>> implements iArbolB <T>{
             if (!nodo.esHoja) {
                 mostrarRec(nodo.hijos.get(i));
             }
-            System.out.print(nodo.claves.get(i) + " | ");
+            System.out.print("ID:" + ((Cancion) nodo.claves.get(i)).getId() + " | ");
         }
 
         if (!nodo.esHoja) {
             mostrarRec(nodo.hijos.get(i));
         }
     }
-
     @Override
     public boolean esVacio() {
         return raiz == null || (raiz.claves.isEmpty() && raiz.esHoja);

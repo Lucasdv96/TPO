@@ -35,6 +35,7 @@ public class Main {
     static Cola<Cancion>          colaReproduccion = new Cola<>();
     static SoporteTecnico<String> soporte          = new SoporteTecnico<>();
     static ArrayList<Cancion> listaGlobalCanciones = new ArrayList<>();
+    static ArrayList<Usuario> listaGlobalUsuarios  = new ArrayList<>();
 
     // ── TDA P5: descomentar cuando Nestor-Kawai entregue ─────────────────────
     static Grafo<Servidor> redCDN = new Grafo<>();
@@ -66,6 +67,13 @@ public class Main {
     static Servidor svMD = new Servidor("MD", "Madrid");
     static Servidor svSP = new Servidor("SP", "São Paulo");
 
+//    static Usuario u1 = new Usuario("Gabriel", "gaby@mail.com",   Usuario.TipoCuenta.PREMIUM);
+//    static Usuario u2 = new Usuario("Lucas",   "lucas@mail.com",  Usuario.TipoCuenta.GRATUITO);
+//    static Usuario u3 = new Usuario("Toto",    "tobias@mail.com", Usuario.TipoCuenta.GRATUITO);
+//    static Usuario u4 = new Usuario("Nestor",  "nestor@mail.com", Usuario.TipoCuenta.PREMIUM);
+//    static Usuario u5 = new Usuario("Brisa",   "brisa@mail.com",  Usuario.TipoCuenta.PREMIUM);
+
+
 
     // ── Datos de prueba ───────────────────────────────────────────────────────
     static void cargarDatosPrueba() {
@@ -80,11 +88,11 @@ public class Main {
 
         // Diccionario: registramos a cada usuario con su prioridad
         // getPrioridad() devuelve 1 si es PREMIUM, 0 si es GRATUITO
-        diccionarioUsuarios.put(u1.getId(), u1.getPrioridad());
-        diccionarioUsuarios.put(u2.getId(), u2.getPrioridad());
-        diccionarioUsuarios.put(u3.getId(), u3.getPrioridad());
-        diccionarioUsuarios.put(u4.getId(), u4.getPrioridad());
-        diccionarioUsuarios.put(u5.getId(), u5.getPrioridad());
+//        diccionarioUsuarios.put(u1.getId(), u1.getPrioridad());
+//        diccionarioUsuarios.put(u2.getId(), u2.getPrioridad());
+//        diccionarioUsuarios.put(u3.getId(), u3.getPrioridad());
+//        diccionarioUsuarios.put(u4.getId(), u4.getPrioridad());
+//        diccionarioUsuarios.put(u5.getId(), u5.getPrioridad());
 
         // ArbolB: catálogo histórico de canciones
         catalogoHistorico.insertar(c1);
@@ -251,6 +259,10 @@ public class Main {
 
         switch (leerInt()) {
             case 1 -> {
+                for (Usuario usuario : listaGlobalUsuarios){
+                    System.out.println(usuario);
+                }
+
                 System.out.print("  ID del usuario a conectar: ");
                 int id = leerInt();
 
@@ -699,7 +711,7 @@ public class Main {
 
         // Usamos el constructor SIN id — el ID se asigna solo con el contador estático
         Usuario nuevo = new Usuario(nombre, email, plan);
-
+        listaGlobalUsuarios.add(nuevo);
         // Registramos en el Diccionario: id → prioridad
         diccionarioUsuarios.put(nuevo.getId(), nuevo.getPrioridad());
 
@@ -912,4 +924,5 @@ public class Main {
         listaGlobalCanciones.add(c4);
         listaGlobalCanciones.add(c5);
     }
+
 }

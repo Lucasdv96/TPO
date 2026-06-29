@@ -103,18 +103,18 @@ public class ArbolGenerico <T> implements iArbolGenerico <T>{
         if (esVacio()) return;
 
         //agrego una cola auxiliar para ir guardando los niveles
-        Queue<NodoNario<T>> cola = new LinkedList<>();
+        Cola<NodoNario<T>> cola = new Cola<>();
         //primero agregamos la raiz.
-        cola.add(this.raiz);
+        cola.enqueue(this.raiz);
 
         while (!cola.isEmpty()) {
             //el bucle termina cuando la cola esta vacia.
 
-            NodoNario<T> actual = cola.poll();//guardamos el primer elemento de la raiz.
+            NodoNario<T> actual = cola.dequeue();//guardamos el primer elemento de la raiz.
             System.out.print(actual.dato + " -> ");
 
             for (NodoNario<T> hijo : actual.hijos) {
-                cola.add(hijo); // si tiene hijos los agrega al final de la cola
+                cola.enqueue(hijo); // si tiene hijos los agrega al final de la cola
             }
         }
         System.out.println();

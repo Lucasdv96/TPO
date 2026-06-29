@@ -129,4 +129,8 @@ public class ArbolGenerico <T> implements iArbolGenerico <T>{
     public boolean esVacio() {
         return this.raiz == null || this.raiz.dato == null;
     }
+
+    public NodoNario<T> getRaiz() {
+        return this.raiz;
+    }
 }
